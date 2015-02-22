@@ -43,7 +43,12 @@ DASH_FULLPATH="$2/$3"
 
 #TODO: make a deployFile function
 deployFile() {
-
+  _SOURCE = $1
+  _DEST   = $2
+  _TYPE   = $3
+  debug "Source: ${_SOURCE}"
+  debug "Dest: ${_DEST}"
+  debug "Type: ${_TYPE}"
 }
 #it should take source, dest, and type of file. error if we can't make it so
 # make dir, link.
