@@ -1,0 +1,19 @@
+$background-color: #424242;
+
+$title-color: rgba(255,255,255,0.7);
+$moreinfo-color: rgba(255,255,255,0.3);
+
+.widget-octocam {
+	padding: 0;
+	background-color: $background-color;
+
+	.title {
+		color: $title-color;
+	}
+
+	.octocam-image-container {
+		display: none;
+		margin-bottom: 15px;
+	}
+
+}

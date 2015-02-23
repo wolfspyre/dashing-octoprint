@@ -1,0 +1,10 @@
+octo_server_fqdn: 'octoprint.example.com'
+octo_server_api_key: 'CHANGEME'
+octo_server_api_port: '443'
+octo_server_api_ssl: true
+octo_server_webcam_ssl: true
+octo_server_webcam_port: '443'
+octo_server_webcam_poll_interval: '30'
+octo_server_snapshot_url: 'https://octoprint.example.com/webcam/?action=snapshot'
+octo_server_last_filename: 'assets/images/octocam/last.jpeg'
+octo_server_latest_filename: 'assets/images/octocam/latest.jpeg'

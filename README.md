@@ -15,7 +15,8 @@ This aims to be a [Dashing](http://shopify.github.io/dashing/#overview) widget a
 
 ###Required Widgets I might decide to make this use multigraph if I ever get it working
 
----
+[camera-widget](https://github.com/grubernaut/camera-widget)
+------------------------------------------------------------
 
 ##Configuration
 

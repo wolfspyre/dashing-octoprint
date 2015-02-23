@@ -1,4 +1,4 @@
-class Dashing.Octoprint extends Dashing.Widget
+class Dashing.Octocam extends Dashing.Widget
 
   ready: ->
     # This is fired when the widget is done being rendered
