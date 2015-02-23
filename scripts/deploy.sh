@@ -41,6 +41,9 @@ cd ${PLUGIN_PATH}
 #validate if dirs are / padded
 DASH_FULLPATH="$2/$3"
 
+if [ $# -ne 3 ]; then
+  usage
+fi
 #TODO: make a deployFile function
 deployFile() {
   _SOURCE = $1
