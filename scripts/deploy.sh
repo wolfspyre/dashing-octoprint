@@ -1,13 +1,26 @@
 #!/bin/bash
+################################################################################
+# Edit these variables for different widget configurations.
+#
+PLUGINNAME="Dashing-OctoPrint"
+REPONAME='dashing-octoprint'
+DEFAULTUSER='pi'
+DEFAULTDASHBOARD='my_dashboard'
+CONFDIR="${DASH_ROOT}/conf.d"
+CONFFILE="octoprint_defaults.yaml"
+declare -a WIDGETS=("octocam" "octoprint")
+declare -a DASHBOARDS=("octoprint.erb")
+declare -a JOBS=("octoprint_snapshot.rb")
+################################################################################
 
 usage () {
   echo -e "Usage: $0 plugin-path parent-dir  dashboard-dir" >>/dev/stderr
   echo -e "  \033[1;33mplugin-path\033[0m:   The path where this repository is cloned." >>/dev/stderr
   echo -e "  \033[1;33mdashboard-dir\033[0m: The subdirectory of parent-dir where the dashing instance is stored." >>/dev/stderr
   echo -e "  \033[1;33mparent-dir\033[0m:    The directory wherein conf.d will be created if it does not exist." >>/dev/stderr
-  echo -e "  \033[32mExample\033[0m: $0 \033[1;33m/home/pi/dashing-plugins/dashing-octoprint /home/pi/ my_dashboard\033[0m" >>/dev/stderr
+  echo -e "  \033[32mExample\033[0m: $0 \033[1;33m/home/${DEFAULTUSER}/dashing-plugins/${REPONAME} /home/${DEFAULTUSER}/ ${DEFAULTDASHBOARD}\033[0m" >>/dev/stderr
   echo -e "Debug statements will be output if the variable DEBUG exists; " >>/dev/stderr
-  echo -e "  \033[32mExample\033[0m: DEBUG=true $0 \033[1;33m/home/pi/dashing-plugins/dashing-octoprint /home/pi my_dashboard\033[0m" >>/dev/stderr
+  echo -e "  \033[32mExample\033[0m: DEBUG=true $0 \033[1;33m/home/${DEFAULTUSER}/dashing-plugins/${REPONAME} /home/${DEFAULTUSER} ${DEFAULTDASHBOARD}\033[0m" >>/dev/stderr
 }
 
 error () {
@@ -36,10 +49,8 @@ DASH_ROOT=$2
 DASH_PATH=$3
 cd ${PLUGIN_PATH}
 
-#validate if dirs are / padded
+#TODO: validate if dirs are / padded
 DASH_FULLPATH="$2/$3"
-
-#TODO: make a deployFile function
 deployFile() {
   _SOURCE=$1
   _DEST=$2
@@ -86,11 +97,6 @@ deployFile() {
     exit 1
   fi
 }
-#it should take source, dest, and type of file. error if we can't make it so
-# make dir, link.
-
-
-
 
 valDir() {
   _dir=$1
@@ -110,59 +116,62 @@ valDir() {
 
 checkConfD(){
   #check for conf.d
-  if [ -e "${DASH_ROOT}/conf.d" ]; then
-    debug "${DASH_ROOT}/conf.d exists"
-    if [ -d "${DASH_ROOT}/conf.d" ]; then
+  if [ -e ${CONFDIR} ]; then
+    debug "${CONFDIR} exists"
+    if [ -d ${CONFDIR} ]; then
       #is a directory
       linkConf
-    elif [ -L "${DASH_ROOT}/conf.d" ]; then
+    elif [ -L ${CONFDIR} ]; then
       #is a link
       linkConf
     else
-      error "${DASH_ROOT}/conf.d exists, but is not a directory or a link. Fix this."
+      error "${CONFDIR} exists, but is not a directory or a link. Fix this."
       exit 1
     fi
   else
-    debug "${DASH_ROOT}/conf.d doesn't exist. Creating it."
-    mkdir "${DASH_ROOT}/conf.d"
+    debug "${CONFDIR} doesn't exist. Creating it."
+    mkdir "${CONFDIR}"
     linkConf
   fi
 }
 
 linkConf(){
-  info "linking default config"
-  deployFile "${PLUGIN_PATH}/conf.d/octoprint_defaults.yaml" "${DASH_ROOT}/conf.d/octoprint_defaults.yaml" link
+  info "linking config:"
+  deployFile "${PLUGIN_PATH}/conf.d/${CONFFILE}" "${CONFDIR}/${CONFFILE}" link
   linkWidgets
 }
 
 linkWidgets(){
   info "linking widget:"
-  for widget in octocam octoprint; do
-    info "    ${widget}"
-    deployFile "${PLUGIN_PATH}/widgets/${widget}" "${DASH_FULLPATH}/widgets/${widget}" link
+  for _widget in ${WIDGETS[@]}; do
+    info "    ${_widget}"
+    deployFile "${PLUGIN_PATH}/widgets/${_widget}" "${DASH_FULLPATH}/widgets/${_widget}" link
   done
   linkJobs
 }
 
 linkJobs(){
   info "Linking jobs:"
-  for job in  octoprint_snapshot.rb ; do
-    info "    $job"
-    deployFile "${PLUGIN_PATH}/jobs/${job}" "${DASH_FULLPATH}/jobs/${job}" link
+  for _job in  ${JOBS[@]} ; do
+    info "    ${_job}"
+    deployFile "${PLUGIN_PATH}/jobs/${_job}" "${DASH_FULLPATH}/jobs/${_job}" link
   done
   linkDashboard
 }
 
 linkDashboard(){
-  info "linking Dashboard: octoprint.erb"
-  deployFile "${PLUGIN_PATH}/dashboards/octoprint.erb" "${DASH_FULLPATH}/dashboards/octoprint.erb" link
+  info "linking Dashboard:"
+  for _dashboard in ${DASHBOARDS[@]}; do
+    info ${_dashboard}
+    deployFile "${PLUGIN_PATH}/dashboards/${_dashboard}" "${DASH_FULLPATH}/dashboards/${_dashboard}" link
+  done
   finishUp
 }
 
 finishUp(){
-  echo -e "\033[32mDashing-Octoprint has been successfully installed!\033[0m">>/dev/stderr
+  echo -e "\033[32m${PLUGINNAME} has been successfully installed!\033[0m">>/dev/stderr
   echo -e "\033[1;33mBe sure to restart dashing to pick up the changes.\033[0m">>/dev/stderr
-  echo -e "Read the \033[1;33mREADME.MD\033[0m file for instructions on the octoprint_defaults.yaml file.">>/dev/stderr
+  echo -e "Read the \033[1;33mREADME.MD\033[0m file for instructions on the ${CONFFILE} file.">>/dev/stderr
 }
 
 #optional cronjob?
