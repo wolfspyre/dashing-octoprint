@@ -2,6 +2,11 @@
 ################################################################################
 # Edit these variables for different widget configurations.
 #
+PLUGIN_PATH=$1
+DASH_ROOT=$2
+DASH_PATH=$3
+#TODO: validate if dirs are / padded
+DASH_FULLPATH="$2/$3"
 PLUGINNAME="Dashing-OctoPrint"
 REPONAME='dashing-octoprint'
 DEFAULTUSER='pi'
@@ -11,6 +16,7 @@ CONFFILE="octoprint_defaults.yaml"
 declare -a WIDGETS=("octocam" "octoprint")
 declare -a DASHBOARDS=("octoprint.erb")
 declare -a JOBS=("octoprint_snapshot.rb")
+declare -a CREATE_DIRS=("assets/images/octocam")
 ################################################################################
 
 usage () {
@@ -44,13 +50,10 @@ debug () {
       echo -e "\033[34mDEBUG\033[0m: \033[32m${FUNCNAME[1]}()\033[0m: $MSG"
   fi
 }
-PLUGIN_PATH=$1
-DASH_ROOT=$2
-DASH_PATH=$3
+
 cd ${PLUGIN_PATH}
 
-#TODO: validate if dirs are / padded
-DASH_FULLPATH="$2/$3"
+
 deployFile() {
   _SOURCE=$1
   _DEST=$2
@@ -100,6 +103,7 @@ deployFile() {
 
 valDir() {
   _dir=$1
+  _force=$2
   debug "${_dir}"
   #check to see if it's not a directory
   if [ -d ${sane_dir} ]; then
@@ -108,9 +112,20 @@ valDir() {
   elif [ -l ${sane_dir} ]; then
     debug "${sane_dir} is a link."
   else
-    #it's neither. crap. die
-    error "${sane_dir} not a directory or a link"
-    exit 1
+    if [ $_force ]; then
+      #try to make the directory
+      mkdir -p ${_dir}
+      if [ $? = 0 ]; then
+        info "Created ${_dir} successfully"
+      else
+        error "Could not create ${_dir}. Exiting"
+        exit 1
+      fi
+    else
+      #force not enabled. Directory does not exist.. crap. die
+      error "${sane_dir} not a directory or a link"
+      exit 1
+    fi
   fi
 }
 
@@ -180,10 +195,16 @@ if [ $# -ne 3 ]; then
 else
   #validate dirs are sane
   for sane_dir in  ${PLUGIN_PATH} ${DASH_FULLPATH}; do
-
     debug "${sane_dir}"
     valDir "${sane_dir}"
   done
+  if [ $CREATE_DIRS ]; then
+    info "creating directories if necessary"
+    for _dir in ${CREATE_DIRS[@]}; do
+      info "${DASH_FULLPATH}/${_dir}"
+      valDir "${DASH_FULLPATH}/${_dir}" FORCE
+    done
+  fi
   checkConfD
   #validate required bins are sane
 fi
