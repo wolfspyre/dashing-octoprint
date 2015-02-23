@@ -106,12 +106,16 @@ valDir() {
   _force=$2
   debug "${_dir}"
   #check to see if it's not a directory
-  if [ -d ${sane_dir} ]; then
-    debug "${sane_dir} is a dir"
-    return
-  elif [ -l ${sane_dir} ]; then
-    debug "${sane_dir} is a link."
+  if [ -e ${_dir} ]; then
+    #it exists
+    if [ -d ${_dir} ]; then
+      debug "${_dir} is a dir"
+      return
+    elif [ -l ${_dir} ]; then
+      debug "${_dir} is a link."
+    fi
   else
+    #it doesn't exist
     if [ $_force == "FORCE" ]; then
       #try to make the directory
       mkdir -p ${_dir}
@@ -123,7 +127,7 @@ valDir() {
       fi
     else
       #force not enabled. Directory does not exist.. crap. die
-      error "${sane_dir} not a directory or a link"
+      error "${_dir} not a directory or a link"
       exit 1
     fi
   fi
@@ -203,7 +207,7 @@ else
     info "creating directories if necessary"
     for _dir in ${CREATE_DIRS[@]}; do
       info "  ${DASH_FULLPATH}/${_dir}"
-      valDir "${DASH_FULLPATH}/${_dir}" FORCE
+      valDir "${DASH_FULLPATH}/${_dir}" "FORCE"
     done
   fi
   checkConfD
