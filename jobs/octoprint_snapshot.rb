@@ -22,6 +22,9 @@ end
 @snapshot_url=octoprint_config['octo_server_snapshot_url']
 @webcam_port=octoprint_config['octo_server_webcam_port']
 @webcam_frequency=octoprint_config['octo_server_webcam_poll_interval']
+warn "OctoPrint: #{CONFIG_DIR}"
+warn "OctoPrint: #{CONFIG_MAIN_FILE}"
+warn "OctoPrint: #{CONFIG_OVERRIDE_FILE}"
 warn "OctoPrint: #{@api_port}"
 warn "OctoPrint: #{@current_file}"
 warn "OctoPrint: #{@last_file}"
