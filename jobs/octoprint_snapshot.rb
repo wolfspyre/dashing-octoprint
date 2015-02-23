@@ -22,7 +22,14 @@ end
 @snapshot_url=octoprint_config['octo_server_snapshot_url']
 @webcam_port=octoprint_config['octo_server_webcam_port']
 @webcam_frequency=octoprint_config['octo_server_webcam_poll_interval']
-
+warn "OctoPrint: @api_port"
+warn "OctoPrint: @current_file"
+warn "OctoPrint: @last_file"
+warn "OctoPrint: @api_key"
+warn "OctoPrint: @octo_server"
+warn "OctoPrint: @snapshot_url"
+warn "OctoPrint: @webcam_port"
+warn "OctoPrint: @webcam_frequency"
 def fetch_image(host,old_file,new_file, cam_port, cam_url)
 	`rm #{old_file}`
 	`mv #{new_file} #{old_file}`
