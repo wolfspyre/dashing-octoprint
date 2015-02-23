@@ -112,7 +112,7 @@ valDir() {
   elif [ -l ${sane_dir} ]; then
     debug "${sane_dir} is a link."
   else
-    if [ $_force ]; then
+    if [ $_force == "FORCE" ]; then
       #try to make the directory
       mkdir -p ${_dir}
       if [ $? = 0 ]; then
@@ -152,6 +152,7 @@ checkConfD(){
 
 linkConf(){
   info "linking config:"
+  info "  ${CONFFILE}"
   deployFile "${PLUGIN_PATH}/conf.d/${CONFFILE}" "${CONFDIR}/${CONFFILE}" link
   linkWidgets
 }
@@ -159,7 +160,7 @@ linkConf(){
 linkWidgets(){
   info "linking widget:"
   for _widget in ${WIDGETS[@]}; do
-    info "    ${_widget}"
+    info "  ${_widget}"
     deployFile "${PLUGIN_PATH}/widgets/${_widget}" "${DASH_FULLPATH}/widgets/${_widget}" link
   done
   linkJobs
@@ -168,7 +169,7 @@ linkWidgets(){
 linkJobs(){
   info "Linking jobs:"
   for _job in  ${JOBS[@]} ; do
-    info "    ${_job}"
+    info "  ${_job}"
     deployFile "${PLUGIN_PATH}/jobs/${_job}" "${DASH_FULLPATH}/jobs/${_job}" link
   done
   linkDashboard
@@ -177,7 +178,7 @@ linkJobs(){
 linkDashboard(){
   info "linking Dashboard:"
   for _dashboard in ${DASHBOARDS[@]}; do
-    info ${_dashboard}
+    info "  ${_dashboard}"
     deployFile "${PLUGIN_PATH}/dashboards/${_dashboard}" "${DASH_FULLPATH}/dashboards/${_dashboard}" link
   done
   finishUp
@@ -201,7 +202,7 @@ else
   if [ $CREATE_DIRS ]; then
     info "creating directories if necessary"
     for _dir in ${CREATE_DIRS[@]}; do
-      info "${DASH_FULLPATH}/${_dir}"
+      info "  ${DASH_FULLPATH}/${_dir}"
       valDir "${DASH_FULLPATH}/${_dir}" FORCE
     done
   fi
