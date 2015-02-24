@@ -1,12 +1,12 @@
 <script type='text/javascript'> $(function() { Dashing.gridsterLayout('[{"col":1,"row":2,"size_x":1,"size_y":1},{"col":1,"row":1,"size_x":1,"size_y":1},{"col":2,"row":2,"size_x":2,"size_y":2},{"col":4,"row":1,"size_x":2,"size_y":1},{"col":4,"row":3,"size_x":2,"size_y":1},{"col":4,"row":2,"size_x":2,"size_y":1},{"col":2,"row":1,"size_x":2,"size_y":1}]') }); </script>
 
 
-<% content_for :title do %>project<% end %>
+<% content_for :title do %>OctoPrint Dashboard<% end %>
 
 <div class="gridster">
   <ul>
     <li data-row="1" data-col="1" data-sizex="1" data-sizey="1">
-  		<div data-id="octoprint_snapshot" data-view="Octocam" data-title="OctoPrint Snapshot"></div>
+  		<div data-id="octoprint_status" data-view="Octoprint" data-title="OctoPrint Status"></div>
   	</li>
 
     <li data-row="1" data-col="1" data-sizex="1" data-sizey="1">
@@ -14,7 +14,7 @@
     </li>
 
     <li data-row="1" data-col="1" data-sizex="2" data-sizey="2">
-        <div data-id="octoprint_snapshot" data-title="OctoPrint Snapshot" data-view="Octocam"></div>
+        <div data-id="octoprint_snapshot" data-title="Current Snapshot" data-view="Octocam"></div>
     </li>
 
     <li data-row="1" data-col="1" data-sizex="2" data-sizey="1">

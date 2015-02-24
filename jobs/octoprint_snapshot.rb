@@ -1,8 +1,8 @@
-#octoprint.rb
+#octoprint_snapshot.rb
 #
 require 'net/http'
+require 'openssl'
 require 'yaml'
-#require 'pry'
 ##############################################
 # Load configuration
 ##############################################
@@ -98,7 +98,5 @@ SCHEDULER.every "#{@webcam_frequency}s", first_in: 0 do
 	if not File.exists?(@current_file)
     warn "Failed to Get Camera Image"
 	end
-	send_event('octoprint_snapshot', octo_image: make_web_friendly(new_snapshot))
-	sleep(@webcam_frequency.to_i)
 	send_event('octoprint_snapshot', octo_image: make_web_friendly(new_snapshot))
 end
