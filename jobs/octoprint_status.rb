@@ -71,6 +71,7 @@ end
 SCHEDULER.every "#{@frequency}s", first_in: 0 do
 	data = getOctoPrintStatus(@octo_server,@api_port,@api_key,@job_endpoint,@api_ssl_enable)
   if data
-    send_event('octoprint_status', octoPrintPrintTimeRemaining: data['progress']['printTimeLeft'], octoPrintFileName: data['job']['file']['name'], octoPrintPrintTime: data['progress']['printTime'],octoPrintProgress: data['progress']['completion'], octoPrintState: data['state'] )
+    progress=data['progress']['completion'].round(2)
+    send_event('octoprint_status', octoPrintPrintTimeRemaining: data['progress']['printTimeLeft'], octoPrintFileName: data['job']['file']['name'], octoPrintPrintTime: data['progress']['printTime'],octoPrintProgress: progress, octoPrintState: data['state'] )
   end
 end
