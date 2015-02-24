@@ -1,8 +1,8 @@
-#octoprint.rb
+#octoprint_snapshot.rb
 #
 require 'net/http'
+require 'openssl'
 require 'yaml'
-#require 'pry'
 ##############################################
 # Load configuration
 ##############################################
