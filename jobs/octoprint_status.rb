@@ -67,11 +67,22 @@ def getOctoPrintStatus(server_fqdn,port,key,endpoint,ssl_enable)
   end
   status_data
 end
+#http://stackoverflow.com/questions/4136248/how-to-generate-a-human-readable-time-range-using-ruby-on-rails
+def humanize secs
+  [[60, :seconds], [60, :minutes], [24, :hours], [1000, :days]].map{ |count, name|
+    if secs > 0
+      secs, n = secs.divmod(count)
+      "#{n.to_i} #{name}"
+    end
+  }.compact.reverse.join(' ')
+end
 # :first_in sets how long it takes before the job is first run. In this case, it is run immediately
 SCHEDULER.every "#{@frequency}s", first_in: 0 do
 	data = getOctoPrintStatus(@octo_server,@api_port,@api_key,@job_endpoint,@api_ssl_enable)
   if data
     progress=data['progress']['completion'].round(2)
-    send_event('octoprint_status', octoPrintPrintTimeRemaining: data['progress']['printTimeLeft'], octoPrintFileName: data['job']['file']['name'], octoPrintPrintTime: data['progress']['printTime'],octoPrintProgress: progress, octoPrintState: data['state'] )
+    time_left=humanize(data['progress']['printTimeLeft'])
+    time_printing=humanize(data['progress']['printTime'])
+    send_event('octoprint_status', octoPrintPrintTimeRemaining: time_left, octoPrintFileName: data['job']['file']['name'], octoPrintPrintTime: time_printing,octoPrintProgress: progress, octoPrintState: data['state'] )
   end
 end
