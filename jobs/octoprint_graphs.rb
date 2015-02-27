@@ -91,7 +91,7 @@ SCHEDULER.every "#{@frequency}s", first_in: 0 do
       bed_target=data['temps']['bed']['target']
       bed_graph.add_point 'actual', time, 1
       bed_graph.add_point 'target', time, 1
-      send_event('octoprint_bed_graph' bed_graph)
+      send_event('octoprint_bed_graph', bed_graph)
       sleep 1
     end
     if @tool0_graph_enable
@@ -99,7 +99,7 @@ SCHEDULER.every "#{@frequency}s", first_in: 0 do
       tool0_target=data['temps']['tool0']['target']
       tool0_graph.add_point 'actual', time, 1
       tool0_graph.add_point 'target', time, 1
-      send_event('octoprint_tool_graph' tool0_graph)
+      send_event('octoprint_tool_graph', tool0_graph)
     end
   end
 end
