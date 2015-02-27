@@ -15,7 +15,7 @@ CONFDIR="${DASH_ROOT}/conf.d"
 CONFFILE="octoprint_defaults.yaml"
 declare -a WIDGETS=("octocam" "octoprint")
 declare -a DASHBOARDS=("octoprint.erb")
-declare -a JOBS=("octoprint_snapshot.rb" "octoprint_status.rb")
+declare -a JOBS=("octoprint_snapshot.rb" "octoprint_status.rb" "octoprint_graphs.rb")
 declare -a CREATE_DIRS=("assets/images/octocam")
 ################################################################################
 
