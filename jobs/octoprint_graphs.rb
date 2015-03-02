@@ -28,8 +28,20 @@ end
 @printer_endpoint=octoprint_config['octo_server_api_printer_endpoint']
 @tool0_color_actual=octoprint_config['octo_server_printer_tool_0_temp_graph_color_actual']
 @tool0_color_target=octoprint_config['octo_server_printer_tool_0_temp_graph_color_target']
-@tool0_graph_enable=octoprint_config['octo_server_printer_bed_temp_graph_enable']
+@tool0_graph_enable=octoprint_config['octo_server_printer_tool_0_temp_graph_enable']
 
+warn "OctoPrint: api_key: #{api_key}"
+warn "OctoPrint: api_port: #{api_port}"
+warn "OctoPrint: api_ssl_enable: #{api_ssl_enable}"
+warn "OctoPrint: bed_color_actual: #{bed_color_actual}"
+warn "OctoPrint: bed_color_target: #{bed_color_target}"
+warn "OctoPrint: bed_graph_enable: #{bed_graph_enable}"
+warn "OctoPrint: frequency: #{frequency}"
+warn "OctoPrint: octo_server: #{octo_server}"
+warn "OctoPrint: printer_endpoint: #{printer_endpoint}"
+warn "OctoPrint: tool0_color_actual: #{tool0_color_actual}"
+warn "OctoPrint: tool0_color_target: #{tool0_color_target}"
+warn "OctoPrint: tool0_graph_enable: #{tool0_graph_enable}"
 
 #see 'Passing Data' section of the rickshawgraphs plugin
 #
@@ -56,14 +68,7 @@ if @bed_graph_enable
   bed_actual_datapoints=[]
   bed_target_datapoints=[]
 end
-#warn "OctoPrint: #{octoConfDir}"
-#warn "OctoPrint: #{octoConfMain}"
-#warn "OctoPrint: #{octoConfOverride}"
-#warn "OctoPrint: #{@api_port}"
-#warn "OctoPrint: #{@api_key}"
-#warn "OctoPrint: #{@octo_server}"
-#warn "OctoPrint: #{@api_ssl_enable}"
-#warn "OctoPrint: #{@job_endpoint}"
+
 def getOctoPrintStatus(server_fqdn,port,key,endpoint,ssl_enable)
   begin
 #  warn "OctoPrint: getOctoPrintStatus: #{port}"
@@ -104,6 +109,7 @@ end
 # :first_in sets how long it takes before the job is first run. In this case, it is run immediately
 SCHEDULER.every "#{@frequency}s", first_in: 0 do
 	data = getOctoPrintStatus(@octo_server,@api_port,@api_key,@printer_endpoint,@api_ssl_enable)
+  warn "OctoPrint: #{data}"
   time = Time.new.to_datetime.to_i
   if data
     if @bed_graph_enable
