@@ -98,5 +98,5 @@ SCHEDULER.every "#{@webcam_frequency}s", first_in: 0 do
 	if not File.exists?(@current_file)
     warn "Failed to Get Camera Image"
 	end
-	send_event('octoprint_snapshot', image: make_web_friendly(new_snapshot))
+	send_event('octoprint_snapshot', {image: make_web_friendly(new_snapshot)})
 end
