@@ -30,11 +30,31 @@ end
 @tool0_color_target=octoprint_config['octo_server_printer_tool_0_temp_graph_color_target']
 @tool0_graph_enable=octoprint_config['octo_server_printer_bed_temp_graph_enable']
 
+
+#see 'Passing Data' section of the rickshawgraphs plugin
+#
+#https://gist.github.com/jwalton/6614023
+#graphite = [
+#  {
+#    target: "stats_counts.http.ok",
+#    datapoints: [[10, 1378449600], [40, 1378452000], [53, 1378454400], [63, 1378456800], [27, 1378459200]]
+#  },
+#  {
+#    target: "stats_counts.http.err",
+#    datapoints: [[0, 1378449600], [4, 1378452000], [nil, 1378454400], [3, 1378456800], [0, 1378459200]]
+#  }
+#]
+#send_event('http', series: graphite)
+#
 if @tool0_graph_enable
-  tool0_graph = DashingGraph.new 'actual' => @tool0_color_actual, 'target' => @tool0_color_target
+  tool0_graph=[]
+  tool0_actual_datapoints=[]
+  tool0_target_datapoints=[]
 end
 if @bed_graph_enable
-  bed_graph = DashingGraph.new 'actual' => @bed_color_actual, 'target' => @bed_color_target
+  bed_graph=[]
+  bed_actual_datapoints=[]
+  bed_target_datapoints=[]
 end
 #warn "OctoPrint: #{octoConfDir}"
 #warn "OctoPrint: #{octoConfMain}"
@@ -87,19 +107,41 @@ SCHEDULER.every "#{@frequency}s", first_in: 0 do
   time = Time.new.to_datetime.to_i
   if data
     if @bed_graph_enable
-      bed_actual=data['temps']['bed']['actual']
-      bed_target=data['temps']['bed']['target']
-      bed_graph.add_point 'actual', time, 1
-      bed_graph.add_point 'target', time, 1
-      send_event('octoprint_bed_graph', bed_graph)
+      bed_actual=data['temps']['bed']['actual'].to_i
+      bed_target=data['temps']['bed']['target'].to_i
+      bed_actual_now=[bed_actual,time]
+      bed_target_now=[bed_target,time]
+      bed_actual_datapoints<<bed_actual_now
+      bed_target_datapoints<<bed_target_now
+      bed_graphite = [
+        {
+          target: "actual_temp", datapoints: bed_actual_datapoints
+        },
+        {
+          target: "target_temp", datapoints: bed_target_datapoints
+        }
+      ]
+      warn "OctoPrint: bed_graphite data: #{bed_graphite}"
+      send_event('octoprint_bed_graph', bed_graphite)
       sleep 1
     end
     if @tool0_graph_enable
-      tool0_actual=data['temps']['tool0']['actual']
-      tool0_target=data['temps']['tool0']['target']
-      tool0_graph.add_point 'actual', time, 1
-      tool0_graph.add_point 'target', time, 1
-      send_event('octoprint_tool_graph', tool0_graph)
+      tool0_actual=data['temps']['tool0']['actual'].to_i
+      tool0_target=data['temps']['tool0']['target'].to_i
+      tool0_actual_now=[tool0_actual,time]
+      tool0_target_now=[tool0_target,time]
+      tool0_actual_datapoints<<tool0_actual_now
+      tool0_target_datapoints<<tool0_target_now
+      tool0_graphite = [
+        {
+          target: "actual_temp", datapoints: tool0_actual_datapoints
+        },
+        {
+          target: "target_temp", datapoints: tool0_target_datapoints
+        }
+      ]
+      warn "OctoPrint: tool0_graphite data: #{tool0_graphite}"
+      send_event('octoprint_tool0_graph', series: tool0_graphite)
     end
   end
 end
