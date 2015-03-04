@@ -13,7 +13,19 @@ This aims to be a [Dashing](http://shopify.github.io/dashing/#overview) widget a
 
 ###Required Widgets
 
-I might decide to make this use multigraph if I ever get it working
+The graphs depend on (Jason Walton's Rickshawgraph plugin)[https://gist.github.com/jwalton/6614023]. The process for installation is pretty straightforward. You should review the installation instructions contained within the repo, as they may supercede these; but this should get you going. There are two ways to do it.
+
+-	Manual Installation
+
+	-	Create a `rickshawgraph` directory in the `widgets` directory of your dashboard installation.
+	-	Place the (rickshawgraph.coffee)[https://gist.github.com/jwalton/6614023/raw/07c3a382845fbc27e0523d7f2de43e43e0904c4b/rickshawgraph.coffee], (rickshawgraph.html)[https://gist.github.com/jwalton/6614023/raw/da626313b868c685e515db19bfd98c68db13d649/rickshawgraph.html], and (rickshawgraph.scss)[https://gist.github.com/jwalton/6614023/raw/8d1fbd74b4915b3b96b899b7c723cf078cf53fc9/rickshawgraph.scss]file, the Inside the newly created `widgets\rickshawgraph` directory
+	-	Restart Dashing.
+
+-	Automatic Installation
+
+	-	from within your dashboard directory; install the gist with the `dashing install` command:
+		-	`dashing install 6614023`
+	-	Restart Dashing.
 
 ---
 

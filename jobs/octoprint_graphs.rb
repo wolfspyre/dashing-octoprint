@@ -1,4 +1,4 @@
-#octoprint_status.rb
+#octoprint_graphs.rb
 #
 require 'net/http'
 require 'openssl'
@@ -31,18 +31,18 @@ end
 @tool0_graph_enable=octoprint_config['octo_server_printer_tool_0_temp_graph_enable']
 @graph_depth=octoprint_config['octo_server_graph_depth']
 
-warn "OctoPrint: api_key: #{@api_key}"
-warn "OctoPrint: api_port: #{@api_port}"
-warn "OctoPrint: api_ssl_enable: #{@api_ssl_enable}"
-warn "OctoPrint: bed_color_actual: #{@bed_color_actual}"
-warn "OctoPrint: bed_color_target: #{@bed_color_target}"
-warn "OctoPrint: bed_graph_enable: #{@bed_graph_enable}"
-warn "OctoPrint: frequency: #{@frequency}"
-warn "OctoPrint: octo_server: #{@octo_server}"
-warn "OctoPrint: printer_endpoint: #{@printer_endpoint}"
-warn "OctoPrint: tool0_color_actual: #{@tool0_color_actual}"
-warn "OctoPrint: tool0_color_target: #{@tool0_color_target}"
-warn "OctoPrint: tool0_graph_enable: #{@tool0_graph_enable}"
+#warn "OctoPrint: api_key: #{@api_key}"
+#warn "OctoPrint: api_port: #{@api_port}"
+#warn "OctoPrint: api_ssl_enable: #{@api_ssl_enable}"
+#warn "OctoPrint: bed_color_actual: #{@bed_color_actual}"
+#warn "OctoPrint: bed_color_target: #{@bed_color_target}"
+#warn "OctoPrint: bed_graph_enable: #{@bed_graph_enable}"
+#warn "OctoPrint: frequency: #{@frequency}"
+#warn "OctoPrint: octo_server: #{@octo_server}"
+#warn "OctoPrint: printer_endpoint: #{@printer_endpoint}"
+#warn "OctoPrint: tool0_color_actual: #{@tool0_color_actual}"
+#warn "OctoPrint: tool0_color_target: #{@tool0_color_target}"
+#warn "OctoPrint: tool0_graph_enable: #{@tool0_graph_enable}"
 
 #see 'Passing Data' section of the rickshawgraphs plugin
 #
@@ -120,17 +120,17 @@ SCHEDULER.every "#{@frequency}s", first_in: 0 do
       bed_target_now=[bed_target,time]
       bed_actual_datapoints<<bed_actual_now
       bed_target_datapoints<<bed_target_now
-      bed_actual_datapoints=bed_actual_datapoints.take(@graph_depth)
-      bed_target_datapoints=bed_target_datapoints.take(@graph_depth)
+      bed_actual_datapoints=bed_actual_datapoints.take(@graph_depth.to_i)
+      bed_target_datapoints=bed_target_datapoints.take(@graph_depth.to_i)
       bed_graphite = [
         {
-          target: "actual_temp", datapoints: bed_actual_datapoints
+          target: "octoprint_bed.temp.actual", datapoints: bed_actual_datapoints
         },
         {
-          target: "target_temp", datapoints: bed_target_datapoints
+          target: "octoprint_bed.temp.target", datapoints: bed_target_datapoints
         }
       ]
-      warn "OctoPrint: bed_graphite data: #{bed_graphite}"
+#      warn "OctoPrint: bed_graphite data: #{bed_graphite}"
       send_event('octoprint_bed_graph', series: bed_graphite)
       sleep 1
     end
@@ -141,17 +141,17 @@ SCHEDULER.every "#{@frequency}s", first_in: 0 do
       tool0_target_now=[tool0_target,time]
       tool0_actual_datapoints<<tool0_actual_now
       tool0_target_datapoints<<tool0_target_now
-      tool0_actual_datapoints=tool0_actual_datapoints.take(@graph_depth)
-      tool0_target_datapoints=tool0_target_datapoints.take(@graph_depth)
+      tool0_actual_datapoints=tool0_actual_datapoints.take(@graph_depth.to_i)
+      tool0_target_datapoints=tool0_target_datapoints.take(@graph_depth.to_i)
       tool0_graphite = [
         {
-          target: "actual_temp", datapoints: tool0_actual_datapoints
+          target: "octoprint_tool0.temp.actual", datapoints: tool0_actual_datapoints
         },
         {
-          target: "target_temp", datapoints: tool0_target_datapoints
+          target: "octoprint_tool0.temp.target", datapoints: tool0_target_datapoints
         }
       ]
-      warn "OctoPrint: tool0_graphite data: #{tool0_graphite}"
+#      warn "OctoPrint: tool0_graphite data: #{tool0_graphite}"
       send_event('octoprint_tool0_graph', series: tool0_graphite)
     end
   end
