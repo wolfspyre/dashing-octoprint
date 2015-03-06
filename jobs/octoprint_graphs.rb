@@ -26,6 +26,7 @@ end
 @frequency=octoprint_config['octo_server_api_poll_interval']
 @graph_depth=octoprint_config['octo_server_graph_depth']
 @job_endpoint=octoprint_config['octo_server_api_job_endpoint']
+@job_time_units=octoprint_config['octo_server_job_graph_time_units']
 @job_graph_enable=octoprint_config['octo_server_job_graph_enable']
 @octo_server=octoprint_config['octo_server_fqdn']
 @printer_endpoint=octoprint_config['octo_server_api_printer_endpoint']
@@ -33,6 +34,20 @@ end
 @tool0_color_target=octoprint_config['octo_server_printer_tool_0_temp_graph_color_target']
 @tool0_graph_enable=octoprint_config['octo_server_printer_tool_0_temp_graph_enable']
 
+case @job_time_units
+when 's', 'sec','seconds'
+  @job_time_units_normalized='s'
+when 'm', 'min', 'minutes'
+  @job_time_units_normalized='m'
+else
+  warn "OctoPrint: Config variable 'octo_server_job_graph_time_units' has invalid value"
+  warn "OctoPrint: Current value: #{@job_time_units}. Defaulting to seconds."
+  @job_time_units_normalized='s'
+end
+def sec_to_min(seconds)
+  #divide by 60.
+  seconds.div(60)
+end
 #warn "OctoPrint: api_key: #{@api_key}"
 #warn "OctoPrint: api_port: #{@api_port}"
 #warn "OctoPrint: api_ssl_enable: #{@api_ssl_enable}"
@@ -133,10 +148,10 @@ SCHEDULER.every "#{@frequency}s", first_in: 0 do
       bed_target_datapoints=bed_target_datapoints.take(@graph_depth.to_i)
       bed_graphite = [
         {
-          target: "octoprint_bed.temp.actual", datapoints: bed_actual_datapoints
+          target: "Actual Temp", datapoints: bed_actual_datapoints
         },
         {
-          target: "octoprint_bed.temp.target", datapoints: bed_target_datapoints
+          target: "Target Temp", datapoints: bed_target_datapoints
         }
       ]
 #      warn "OctoPrint: bed_graphite data: #{bed_graphite}"
@@ -154,10 +169,10 @@ SCHEDULER.every "#{@frequency}s", first_in: 0 do
       tool0_target_datapoints=tool0_target_datapoints.take(@graph_depth.to_i)
       tool0_graphite = [
         {
-          target: "octoprint_tool0.temp.actual", datapoints: tool0_actual_datapoints
+          target: "Actual Temp", datapoints: tool0_actual_datapoints
         },
         {
-          target: "octoprint_tool0.temp.target", datapoints: tool0_target_datapoints
+          target: "Target Temp", datapoints: tool0_target_datapoints
         }
       ]
 #      warn "OctoPrint: tool0_graphite data: #{tool0_graphite}"
@@ -183,7 +198,12 @@ SCHEDULER.every "#{@frequency}s", first_in: 0 do
       file_position_datapoints<<file_position_now
       file_position_datapoints=file_position_datapoints.take(@graph_depth.to_i)
 
-      print_time=job['progress']['printTime'].to_i
+      _print_time=job['progress']['printTime'].to_i
+      if @job_time_units_normalized == 'm'
+        print_time = sec_to_min(_print_time)
+      else
+        print_time = _print_time
+      end
       print_time_now=[print_time,time]
       print_time_datapoints<<print_time_now
       print_time_datapoints=print_time_datapoints.take(@graph_depth.to_i)
@@ -198,9 +218,6 @@ SCHEDULER.every "#{@frequency}s", first_in: 0 do
       estimated_print_time_datapoints<<estimated_print_time_now
       estimated_print_time_datapoints=estimated_print_time_datapoints.take(@graph_depth.to_i)
       job_graphite = [
-        {
-          target: "Completion", datapoints: completion_datapoints
-        },
         {
           target: "File Position", datapoints: file_position_datapoints
         }

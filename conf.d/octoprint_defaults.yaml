@@ -7,6 +7,7 @@ octo_server_api_ssl: true
 octo_server_fqdn: 'octoprint.example.com'
 octo_server_graph_depth: '300'
 octo_server_job_graph_enable: true
+octo_server_job_graph_time_units: 'minutes'
 octo_server_last_filename: 'assets/images/octocam/last.jpeg'
 octo_server_latest_filename: 'assets/images/octocam/latest.jpeg'
 octo_server_printer_bed_temp_graph_color_actual: '#00ff00'
