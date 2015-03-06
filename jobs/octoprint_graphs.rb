@@ -238,7 +238,7 @@ SCHEDULER.every "#{@frequency}s", first_in: 0 do
       sleep 1
       send_event('octoprint_time_graph', series: time_graphite)
       sleep 1
-      send_event('octoprint_completion', completion)
+      send_event('octoprint_completion', value: completion, bgcolor: '333', fgcolor: '3c3')
     end
   end
 end
