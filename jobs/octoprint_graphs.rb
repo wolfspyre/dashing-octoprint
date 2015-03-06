@@ -24,12 +24,14 @@ end
 @bed_color_target=octoprint_config['octo_server_printer_bed_temp_graph_color_target']
 @bed_graph_enable=octoprint_config['octo_server_printer_bed_temp_graph_enable']
 @frequency=octoprint_config['octo_server_api_poll_interval']
+@graph_depth=octoprint_config['octo_server_graph_depth']
+@job_endpoint=octoprint_config['octo_server_api_job_endpoint']
+@job_graph_enable=octoprint_config['octo_server_job_graph_enable']
 @octo_server=octoprint_config['octo_server_fqdn']
 @printer_endpoint=octoprint_config['octo_server_api_printer_endpoint']
 @tool0_color_actual=octoprint_config['octo_server_printer_tool_0_temp_graph_color_actual']
 @tool0_color_target=octoprint_config['octo_server_printer_tool_0_temp_graph_color_target']
 @tool0_graph_enable=octoprint_config['octo_server_printer_tool_0_temp_graph_enable']
-@graph_depth=octoprint_config['octo_server_graph_depth']
 
 #warn "OctoPrint: api_key: #{@api_key}"
 #warn "OctoPrint: api_port: #{@api_port}"
@@ -69,7 +71,14 @@ if @bed_graph_enable
   bed_actual_datapoints=[]
   bed_target_datapoints=[]
 end
-
+if @job_graph_enable
+  job_graph=[]
+  completion_datapoints=[]
+  estimated_print_time_datapoints=[]
+  file_position_datapoints=[]
+  print_time_datapoints=[]
+  print_time_left_datapoints=[]
+end
 def getOctoPrintStatus(server_fqdn,port,key,endpoint,ssl_enable)
   begin
 #  warn "OctoPrint: getOctoPrintStatus: #{port}"
@@ -137,6 +146,86 @@ SCHEDULER.every "#{@frequency}s", first_in: 0 do
     if @tool0_graph_enable
       tool0_actual=data['temps']['tool0']['actual'].to_i
       tool0_target=data['temps']['tool0']['target'].to_i
+      tool0_actual_now=[tool0_actual,time]
+      tool0_target_now=[tool0_target,time]
+      tool0_actual_datapoints<<tool0_actual_now
+      tool0_target_datapoints<<tool0_target_now
+      tool0_actual_datapoints=tool0_actual_datapoints.take(@graph_depth.to_i)
+      tool0_target_datapoints=tool0_target_datapoints.take(@graph_depth.to_i)
+      tool0_graphite = [
+        {
+          target: "octoprint_tool0.temp.actual", datapoints: tool0_actual_datapoints
+        },
+        {
+          target: "octoprint_tool0.temp.target", datapoints: tool0_target_datapoints
+        }
+      ]
+#      warn "OctoPrint: tool0_graphite data: #{tool0_graphite}"
+      send_event('octoprint_tool0_graph', series: tool0_graphite)
+    end
+  end
+end
+SCHEDULER.every "#{@frequency}s", first_in: 0 do
+  if @job_graph_enable
+	  job = getOctoPrintStatus(@octo_server,@api_port,@api_key,@job_endpoint,@api_ssl_enable)
+    warn "OctoPrint: #{job}"
+    time = Time.now.to_i
+    if job
+      estimated_print_time=job['estimatedPrintTime'].to_i
+
+      completion=(job['progress']['completion'].to_f).round(2)
+      completion_now=[completion,time]
+      completion_datapoints<<completion_now
+      completion_datapoints=completion_datapoints.take(@graph_depth.to_i)
+
+      file_position=job['progress']['filepos'].to_i
+      file_position_now=[file_position,time]
+      file_position_datapoints<<file_position_now
+      file_position_datapoints=file_position_datapoints.take(@graph_depth.to_i)
+
+      print_time=job['progress']['printTime'].to_i
+      print_time_now=[print_time,time]
+      print_time_datapoints<<print_time_now
+      print_time_datapoints=print_time_datapoints.take(@graph_depth.to_i)
+
+      print_time_left=job['progress']['printTimeLeft'].to_i
+      print_time_left_now=[print_time_left,time]
+      print_time_left_datapoints<<print_time_left_now
+      print_time_left_datapoints=print_time_left_datapoints.take(@graph_depth.to_i)
+
+      estimated_print_time=job['estimatedPrintTime'].to_i
+      estimated_print_time_now=[estimated_print_time,time]
+      estimated_print_time_datapoints<<estimated_print_time_now
+      estimated_print_time_datapoints=estimated_print_time_datapoints.take(@graph_depth.to_i)
+      job_graphite = [
+        {
+          target: "Completion", datapoints: completion_datapoints
+        },
+        {
+          target: "File Position", datapoints: file_position_datapoints
+        }
+      ]
+      time_graphite = [
+        {
+          target: "Print Time", datapoints: print_time_datapoints
+        },
+        {
+          target: "Print Time Left", datapoints: print_time_left_datapoints
+        },
+        {
+          target: "Estimated Print Time", datapoints: estimated_print_time_datapoints
+        }
+      ]
+#      warn "OctoPrint: bed_graphite job: #{bed_graphite}"
+      send_event('octoprint_job_graph', series: job_graphite)
+      sleep 1
+      send_event('octoprint_time_graph', series: time_graphite)
+      sleep 1
+      send_event('octoprint_completion', completion)
+    end
+    if @tool0_graph_enable
+      tool0_actual=job['temps']['tool0']['actual'].to_i
+      tool0_target=job['temps']['tool0']['target'].to_i
       tool0_actual_now=[tool0_actual,time]
       tool0_target_now=[tool0_target,time]
       tool0_actual_datapoints<<tool0_actual_now
