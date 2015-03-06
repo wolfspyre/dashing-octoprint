@@ -223,25 +223,5 @@ SCHEDULER.every "#{@frequency}s", first_in: 0 do
       sleep 1
       send_event('octoprint_completion', completion)
     end
-    if @tool0_graph_enable
-      tool0_actual=job['temps']['tool0']['actual'].to_i
-      tool0_target=job['temps']['tool0']['target'].to_i
-      tool0_actual_now=[tool0_actual,time]
-      tool0_target_now=[tool0_target,time]
-      tool0_actual_datapoints<<tool0_actual_now
-      tool0_target_datapoints<<tool0_target_now
-      tool0_actual_datapoints=tool0_actual_datapoints.take(@graph_depth.to_i)
-      tool0_target_datapoints=tool0_target_datapoints.take(@graph_depth.to_i)
-      tool0_graphite = [
-        {
-          target: "octoprint_tool0.temp.actual", datapoints: tool0_actual_datapoints
-        },
-        {
-          target: "octoprint_tool0.temp.target", datapoints: tool0_target_datapoints
-        }
-      ]
-#      warn "OctoPrint: tool0_graphite data: #{tool0_graphite}"
-      send_event('octoprint_tool0_graph', series: tool0_graphite)
-    end
   end
 end
