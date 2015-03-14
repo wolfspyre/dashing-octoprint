@@ -13,7 +13,7 @@ This aims to be a [Dashing](http://shopify.github.io/dashing/#overview) widget a
 
 ###Required Widgets
 
-The graphs depend on (Jason Walton's Rickshawgraph plugin)[https://gist.github.com/jwalton/6614023]. The process for installation is pretty straightforward. You should review the installation instructions contained within the repo, as they may supercede these; but this should get you going. There are two ways to do it.
+The graphs depend on (Jason Walton's Rickshawgraph plugin)[https://gist.github.com/jwalton/6614023]. The process for installation is pretty straightforward. You should review the installation instructions contained within the repo, as they may supersede these; but this should get you going. There are two ways to do it.
 
 -	Manual Installation
 
