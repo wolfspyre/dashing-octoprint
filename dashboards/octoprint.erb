@@ -1,6 +1,4 @@
-<script type='text/javascript'> $(function() { Dashing.gridsterLayout('[{"col":1,"row":2,"size_x":1,"size_y":1},{"col":1,"row":1,"size_x":1,"size_y":1},{"col":2,"row":2,"size_x":2,"size_y":2},{"col":4,"row":1,"size_x":2,"size_y":1},{"col":4,"row":3,"size_x":2,"size_y":1},{"col":4,"row":2,"size_x":2,"size_y":1},{"col":2,"row":1,"size_x":2,"size_y":1}]') }); </script>
-
-
+<script type='text/javascript'>$(function() {Dashing.gridsterLayout('[{"col":3,"row":2,"size_x":1,"size_y":1},{"col":3,"row":1,"size_x":1,"size_y":1},{"col":1,"row":2,"size_x":2,"size_y":2},{"col":4,"row":1,"size_x":2,"size_y":1},{"col":4,"row":3,"size_x":2,"size_y":1},{"col":4,"row":2,"size_x":2,"size_y":1},{"col":1,"row":1,"size_x":2,"size_y":1},{"col":3,"row":3,"size_x":1,"size_y":1}]')});</script>
 <% content_for :title do %>OctoPrint Dashboard<% end %>
 
 <div class="gridster">
@@ -16,21 +14,20 @@
     <li data-row="1" data-col="1" data-sizex="2" data-sizey="2">
         <div data-id="octoprint_snapshot" data-title="Current Snapshot" data-view="Octocam"></div>
     </li>
-
     <li data-row="1" data-col="1" data-sizex="2" data-sizey="1">
-        <div data-id="octo_stat1" data-title="octostat2" data-view="Graph"></div>
+        <div data-id="octoprint_bed_graph" data-title="Bed Temp" data-renderer="line" data-legend="true" data-summary-method="last" data-color-scheme="default" data-min="0" data-max="200" data-view="Rickshawgraph"></div>
     </li>
     <li data-row="1" data-col="1" data-sizex="2" data-sizey="1">
-        <div data-id="octo_stat2" data-title="octostat3" data-view="Graph"></div>
+        <div data-id="octoprint_job_graph" data-title="File Position" data-renderer="line" data-legend="true" data-summary-method="last"  data-color-scheme="default" data-min="0" data-view="Rickshawgraph"></div>
     </li>
     <li data-row="1" data-col="1" data-sizex="2" data-sizey="1">
-        <div data-id="octo_stat3" data-title="octostat4" data-view="Graph"></div>
+        <div data-id="octoprint_tool0_graph" data-title="Tool0 Temp" data-renderer="line" data-legend="true" data-summary-method="last"  data-color-scheme="default" data-min="0" data-max="290"  data-view="Rickshawgraph"></div>
     </li>
     <li data-row="1" data-col="1" data-sizex="2" data-sizey="1">
-        <div data-id="octo_stat4" data-title="octostat5" data-view="Graph"></div>
+        <div data-id="octoprint_time_graph" data-title="Time " data-renderer="line" data-legend="true" data-summary-method="last"  data-color-scheme="default" data-min="0"  data-view="Rickshawgraph"></div>
     </li>
-
-
+    <li data-row="1" data-col="1" data-sizex="1" data-sizey="1">
+        <div data-id="octoprint_completion" data-title="completion" data-view="Meter"></div>
+    </li>
   </ul>
-  <center><div style="font-size: 12px"><a href="">OctoPrint</a><a href="OctoPi">OctoPi</a></div></center>
 </div>

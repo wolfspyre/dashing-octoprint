@@ -88,7 +88,8 @@ def fetch_image(host,old_file,new_file, cam_port, cam_url, ssl_enable)
 end
 def make_web_friendly(file)
 #warn "OctoPrint: make_web_friendly: #{file}"
-  out = "/" + File.basename(File.dirname(file)) + "/" + File.basename(file)
+  #out = "/" + File.basename(File.dirname(file)) + "/" + File.basename(file)
+  out = '/' + File.basename(File.dirname(file)) + '/' + File.basename(file) + '?ver=' + Time.now.to_i.to_s
 #warn "OctoPrint: make_web_friendly: #{out}"
   out
 end
@@ -98,5 +99,6 @@ SCHEDULER.every "#{@webcam_frequency}s", first_in: 0 do
 	if not File.exists?(@current_file)
     warn "Failed to Get Camera Image"
 	end
-	send_event('octoprint_snapshot', octo_image: make_web_friendly(new_snapshot))
+  _last_file = @last_file.slice "assets"
+	send_event('octoprint_snapshot', {"octo-image": make_web_friendly(new_snapshot)})
 end
