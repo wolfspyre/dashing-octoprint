@@ -183,7 +183,7 @@ end
 SCHEDULER.every "#{@frequency}s", first_in: 0 do
   if @job_graph_enable
 	  job = getOctoPrintStatus(@octo_server,@api_port,@api_key,@job_endpoint,@api_ssl_enable)
-    warn "OctoPrint: #{job}"
+#    warn "OctoPrint: #{job}"
     time = Time.now.to_i
     if job
       estimated_print_time=job['estimatedPrintTime'].to_i
