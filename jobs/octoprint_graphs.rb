@@ -21,6 +21,7 @@ end
 @api_port=octoprint_config['octo_server_api_port']
 @api_ssl_enable=octoprint_config['octo_server_api_ssl']
 @bed_color_actual=octoprint_config['octo_server_printer_bed_temp_graph_color_actual']
+@bed_color_background=octoprint_config['octo_server_printer_bed_temp_graph_color_background']
 @bed_color_target=octoprint_config['octo_server_printer_bed_temp_graph_color_target']
 @bed_graph_enable=octoprint_config['octo_server_printer_bed_temp_graph_enable']
 @frequency=octoprint_config['octo_server_api_poll_interval']
@@ -31,6 +32,7 @@ end
 @octo_server=octoprint_config['octo_server_fqdn']
 @printer_endpoint=octoprint_config['octo_server_api_printer_endpoint']
 @tool0_color_actual=octoprint_config['octo_server_printer_tool_0_temp_graph_color_actual']
+@tool0_color_background=octoprint_config['octo_server_printer_tool_0_temp_graph_color_background']
 @tool0_color_target=octoprint_config['octo_server_printer_tool_0_temp_graph_color_target']
 @tool0_graph_enable=octoprint_config['octo_server_printer_tool_0_temp_graph_enable']
 
@@ -147,6 +149,11 @@ SCHEDULER.every "#{@frequency}s", first_in: 0 do
       bed_target_datapoints<<bed_target_now
       bed_actual_datapoints=bed_actual_datapoints.take(@graph_depth.to_i)
       bed_target_datapoints=bed_target_datapoints.take(@graph_depth.to_i)
+      bed_display="'Target: #{bed_target} Now: #{bed_actual}'"
+      bed_colors="#{@bed_color_actual}:#{@bed_color_target}"
+
+      warn "OctoPrint: bed display data: #{bed_display}"
+      warn "OctoPrint: bed colors: #{bed_colors}"
       bed_graphite = [
         {
           target: "Actual Temp", datapoints: bed_actual_datapoints
@@ -156,7 +163,7 @@ SCHEDULER.every "#{@frequency}s", first_in: 0 do
         }
       ]
 #      warn "OctoPrint: bed_graphite data: #{bed_graphite}"
-      send_event('octoprint_bed_graph', series: bed_graphite)
+      send_event('octoprint_bed_graph', series: bed_graphite, colors: bed_colors)
       sleep 1
     end
     if @tool0_graph_enable

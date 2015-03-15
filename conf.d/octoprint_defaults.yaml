@@ -11,9 +11,11 @@ octo_server_job_graph_time_units: 'minutes'
 octo_server_last_filename: 'assets/images/octocam/last.jpeg'
 octo_server_latest_filename: 'assets/images/octocam/latest.jpeg'
 octo_server_printer_bed_temp_graph_color_actual: '#00ff00'
+octo_server_printer_bed_temp_graph_color_background: '#cccccc'
 octo_server_printer_bed_temp_graph_color_target: '#ff0000'
 octo_server_printer_bed_temp_graph_enable: true
 octo_server_printer_tool_0_temp_graph_color_actual: '#00ff00'
+octo_server_printer_tool_0_temp_graph_color_background: '#cccccc'
 octo_server_printer_tool_0_temp_graph_color_target: '#ff0000'
 octo_server_printer_tool_0_temp_graph_enable: true
 octo_server_printer_tool_1_temp_graph_color_actual: '#00ff00'
