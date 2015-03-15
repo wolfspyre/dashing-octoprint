@@ -28,6 +28,10 @@ end
 @graph_depth=octoprint_config['octo_server_graph_depth']
 @job_endpoint=octoprint_config['octo_server_api_job_endpoint']
 @job_time_units=octoprint_config['octo_server_job_graph_time_units']
+
+@time_color_elapsed=octoprint_config['octo_server_job_graph_time_color_elapsed']
+@time_color_estimated=octoprint_config['octo_server_job_graph_time_color_estimated']
+@time_color_remaining=octoprint_config['octo_server_job_graph_time_color_remaining']
 @job_graph_enable=octoprint_config['octo_server_job_graph_enable']
 @octo_server=octoprint_config['octo_server_fqdn']
 @printer_endpoint=octoprint_config['octo_server_api_printer_endpoint']
@@ -237,13 +241,14 @@ SCHEDULER.every "#{@frequency}s", first_in: 0 do
       estimated_print_time_now=[estimated_print_time,time]
       estimated_print_time_datapoints<<estimated_print_time_now
       estimated_print_time_datapoints=estimated_print_time_datapoints.take(@graph_depth.to_i)
+      time_colors="#{@time_color_elapsed}:#{@time_color_remaining}:#{@time_color_estimated}"
 #      warn "OctoPrint: completion:           #{completion}"
 #      warn "OctoPrint: print_time:           #{print_time}           (raw: #{_print_time})"
 #      warn "OctoPrint: print_time_left:      #{print_time_left}      (raw: #{_print_time_left})"
 #      warn "OctoPrint: estimated_print_time: #{estimated_print_time} (raw: #{_estimated_print_time})"
       job_graphite = [
         {
-          target: "Job Position", datapoints: file_position_datapoints
+          target: "Job Position ", datapoints: file_position_datapoints
         },
         {
           target: "Job Total Size", datapoints: file_size_datapoints
@@ -251,19 +256,19 @@ SCHEDULER.every "#{@frequency}s", first_in: 0 do
       ]
       time_graphite = [
         {
-          target: "Print Time", datapoints: print_time_datapoints
+          target: "Elapsed: #{print_time}", datapoints: print_time_datapoints
         },
         {
-          target: "Print Time Left", datapoints: print_time_left_datapoints
+          target: "Remaining: #{print_time_left}", datapoints: print_time_left_datapoints
         },
         {
-          target: "Estimated Print Time", datapoints: estimated_print_time_datapoints
+          target: "Estimated Total: #{estimated_print_time}", datapoints: estimated_print_time_datapoints
         }
       ]
 #      warn "OctoPrint: bed_graphite job: #{bed_graphite}"
       send_event('octoprint_job_graph', series: job_graphite)
       sleep 1
-      send_event('octoprint_time_graph', series: time_graphite)
+      send_event('octoprint_time_graph', series: time_graphite, colors: time_colors)
       sleep 1
       send_event('octoprint_completion', value: completion, bgcolor: '333', fgcolor: '3c3')
     end
