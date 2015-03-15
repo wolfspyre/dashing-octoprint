@@ -241,7 +241,7 @@ SCHEDULER.every "#{@frequency}s", first_in: 0 do
       estimated_print_time_now=[estimated_print_time,time]
       estimated_print_time_datapoints<<estimated_print_time_now
       estimated_print_time_datapoints=estimated_print_time_datapoints.take(@graph_depth.to_i)
-      time_colors="#{@time_color_elapsed}:#{@time_color_remaining}:#{@time_color_estimated}"
+      time_colors="#{@time_color_estimated}:#{@time_color_remaining}:#{@time_color_elapsed}"
 #      warn "OctoPrint: completion:           #{completion}"
 #      warn "OctoPrint: print_time:           #{print_time}           (raw: #{_print_time})"
 #      warn "OctoPrint: print_time_left:      #{print_time_left}      (raw: #{_print_time_left})"
@@ -256,14 +256,15 @@ SCHEDULER.every "#{@frequency}s", first_in: 0 do
       ]
       time_graphite = [
         {
-          target: "Elapsed: #{print_time}", datapoints: print_time_datapoints
+          target: "Estimated Total: #{estimated_print_time}", datapoints: estimated_print_time_datapoints
         },
         {
           target: "Remaining: #{print_time_left}", datapoints: print_time_left_datapoints
         },
         {
-          target: "Estimated Total: #{estimated_print_time}", datapoints: estimated_print_time_datapoints
+          target: "Elapsed: #{print_time}", datapoints: print_time_datapoints
         }
+
       ]
 #      warn "OctoPrint: bed_graphite job: #{bed_graphite}"
       send_event('octoprint_job_graph', series: job_graphite)
