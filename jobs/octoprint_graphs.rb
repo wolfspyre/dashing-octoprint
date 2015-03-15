@@ -91,6 +91,7 @@ if @job_graph_enable
   completion_datapoints=[]
   estimated_print_time_datapoints=[]
   file_position_datapoints=[]
+  file_size_datapoints=[]
   print_time_datapoints=[]
   print_time_left_datapoints=[]
 end
@@ -198,6 +199,11 @@ SCHEDULER.every "#{@frequency}s", first_in: 0 do
       file_position_datapoints<<file_position_now
       file_position_datapoints=file_position_datapoints.take(@graph_depth.to_i)
 
+      file_size=job['job']['file']['size'].to_i
+      file_size_now=[file_size,time]
+      file_size_datapoints<<file_size_now
+      file_size_datapoints=file_size_datapoints.take(@graph_depth.to_i)
+
       _print_time=job['progress']['printTime'].to_i
       if @job_time_units_normalized == 'm'
         print_time = sec_to_min(_print_time)
@@ -208,19 +214,36 @@ SCHEDULER.every "#{@frequency}s", first_in: 0 do
       print_time_datapoints<<print_time_now
       print_time_datapoints=print_time_datapoints.take(@graph_depth.to_i)
 
-      print_time_left=job['progress']['printTimeLeft'].to_i
+      _print_time_left=job['progress']['printTimeLeft'].to_i
+      if @job_time_units_normalized == 'm'
+        print_time_left = sec_to_min(_print_time_left)
+      else
+        print_time_left = _print_time_left
+      end
       print_time_left_now=[print_time_left,time]
       print_time_left_datapoints<<print_time_left_now
       print_time_left_datapoints=print_time_left_datapoints.take(@graph_depth.to_i)
 
-      estimated_print_time=job['estimatedPrintTime'].to_i
+      _estimated_print_time=job['job']['estimatedPrintTime'].to_i
+      if @job_time_units_normalized == 'm'
+        estimated_print_time = sec_to_min(_estimated_print_time)
+      else
+        estimated_print_time = _estimated_print_time
+      end
       estimated_print_time_now=[estimated_print_time,time]
       estimated_print_time_datapoints<<estimated_print_time_now
       estimated_print_time_datapoints=estimated_print_time_datapoints.take(@graph_depth.to_i)
+#      warn "OctoPrint: completion:           #{completion}"
+#      warn "OctoPrint: print_time:           #{print_time}           (raw: #{_print_time})"
+#      warn "OctoPrint: print_time_left:      #{print_time_left}      (raw: #{_print_time_left})"
+#      warn "OctoPrint: estimated_print_time: #{estimated_print_time} (raw: #{_estimated_print_time})"
       job_graphite = [
         {
-          target: "File Position", datapoints: file_position_datapoints
-        }
+          target: "Job Position", datapoints: file_position_datapoints
+        },
+        {
+          target: "Job Total Size", datapoints: file_size_datapoints
+        },
       ]
       time_graphite = [
         {
