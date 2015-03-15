@@ -149,17 +149,13 @@ SCHEDULER.every "#{@frequency}s", first_in: 0 do
       bed_target_datapoints<<bed_target_now
       bed_actual_datapoints=bed_actual_datapoints.take(@graph_depth.to_i)
       bed_target_datapoints=bed_target_datapoints.take(@graph_depth.to_i)
-      bed_display="'Target: #{bed_target} Now: #{bed_actual}'"
       bed_colors="#{@bed_color_actual}:#{@bed_color_target}"
-
-      warn "OctoPrint: bed display data: #{bed_display}"
-      warn "OctoPrint: bed colors: #{bed_colors}"
       bed_graphite = [
         {
-          target: "Actual Temp", datapoints: bed_actual_datapoints
+          target: "Actual: #{bed_actual}", datapoints: bed_actual_datapoints
         },
         {
-          target: "Target Temp", datapoints: bed_target_datapoints
+          target: "Target: #{bed_target}", datapoints: bed_target_datapoints
         }
       ]
 #      warn "OctoPrint: bed_graphite data: #{bed_graphite}"
@@ -175,16 +171,17 @@ SCHEDULER.every "#{@frequency}s", first_in: 0 do
       tool0_target_datapoints<<tool0_target_now
       tool0_actual_datapoints=tool0_actual_datapoints.take(@graph_depth.to_i)
       tool0_target_datapoints=tool0_target_datapoints.take(@graph_depth.to_i)
+      tool0_colors="#{@tool0_color_actual}:#{@tool0_color_target}"
       tool0_graphite = [
         {
-          target: "Actual Temp", datapoints: tool0_actual_datapoints
+          target: "Actual: #{tool0_actual}", datapoints: tool0_actual_datapoints
         },
         {
-          target: "Target Temp", datapoints: tool0_target_datapoints
+          target: "Target: #{tool0_target}", datapoints: tool0_target_datapoints
         }
       ]
 #      warn "OctoPrint: tool0_graphite data: #{tool0_graphite}"
-      send_event('octoprint_tool0_graph', series: tool0_graphite)
+      send_event('octoprint_tool0_graph', series: tool0_graphite, colors: tool0_colors )
     end
   end
 end
