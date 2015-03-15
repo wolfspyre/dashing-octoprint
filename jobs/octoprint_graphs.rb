@@ -224,7 +224,7 @@ SCHEDULER.every "#{@frequency}s", first_in: 0 do
       print_time_left_datapoints<<print_time_left_now
       print_time_left_datapoints=print_time_left_datapoints.take(@graph_depth.to_i)
 
-      _estimated_print_time=job['estimatedPrintTime'].to_i
+      _estimated_print_time=job['job']['estimatedPrintTime'].to_i
       if @job_time_units_normalized == 'm'
         estimated_print_time = sec_to_min(_estimated_print_time)
       else
