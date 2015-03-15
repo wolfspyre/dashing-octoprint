@@ -233,10 +233,10 @@ SCHEDULER.every "#{@frequency}s", first_in: 0 do
       estimated_print_time_now=[estimated_print_time,time]
       estimated_print_time_datapoints<<estimated_print_time_now
       estimated_print_time_datapoints=estimated_print_time_datapoints.take(@graph_depth.to_i)
-      warn "OctoPrint: completion:           #{completion}"
-      warn "OctoPrint: print_time:           #{print_time}           (raw: #{_print_time})"
-      warn "OctoPrint: print_time_left:      #{print_time_left}      (raw: #{_print_time_left})"
-      warn "OctoPrint: estimated_print_time: #{estimated_print_time} (raw: #{_estimated_print_time})"
+#      warn "OctoPrint: completion:           #{completion}"
+#      warn "OctoPrint: print_time:           #{print_time}           (raw: #{_print_time})"
+#      warn "OctoPrint: print_time_left:      #{print_time_left}      (raw: #{_print_time_left})"
+#      warn "OctoPrint: estimated_print_time: #{estimated_print_time} (raw: #{_estimated_print_time})"
       job_graphite = [
         {
           target: "Job Position", datapoints: file_position_datapoints
