@@ -269,7 +269,7 @@ SCHEDULER.every "#{@frequency}s", first_in: 0 do
           target: "Job Position: #{file_position.to_filesize}", datapoints: file_position_datapoints
         },
         {
-          target: "Job Total Size: #{file_position.to_filesize}", datapoints: file_size_datapoints
+          target: "Job Total Size: #{file_size.to_filesize}", datapoints: file_size_datapoints
         },
       ]
       time_graphite = [
