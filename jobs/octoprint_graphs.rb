@@ -21,16 +21,25 @@ end
 @api_port=octoprint_config['octo_server_api_port']
 @api_ssl_enable=octoprint_config['octo_server_api_ssl']
 @bed_color_actual=octoprint_config['octo_server_printer_bed_temp_graph_color_actual']
+@bed_color_background=octoprint_config['octo_server_printer_bed_temp_graph_color_background']
 @bed_color_target=octoprint_config['octo_server_printer_bed_temp_graph_color_target']
 @bed_graph_enable=octoprint_config['octo_server_printer_bed_temp_graph_enable']
+@completion_bgcolor=octoprint_config['octo_server_completion_bgcolor']
+@completion_fgcolor=octoprint_config['octo_server_completion_fgcolor']
+@file_color_position=octoprint_config['octo_server_job_graph_file_color_position']
+@file_color_total=octoprint_config['octo_server_job_graph_file_color_total']
 @frequency=octoprint_config['octo_server_api_poll_interval']
 @graph_depth=octoprint_config['octo_server_graph_depth']
 @job_endpoint=octoprint_config['octo_server_api_job_endpoint']
-@job_time_units=octoprint_config['octo_server_job_graph_time_units']
 @job_graph_enable=octoprint_config['octo_server_job_graph_enable']
+@job_time_units=octoprint_config['octo_server_job_graph_time_units']
 @octo_server=octoprint_config['octo_server_fqdn']
 @printer_endpoint=octoprint_config['octo_server_api_printer_endpoint']
+@time_color_elapsed=octoprint_config['octo_server_job_graph_time_color_elapsed']
+@time_color_estimated=octoprint_config['octo_server_job_graph_time_color_estimated']
+@time_color_remaining=octoprint_config['octo_server_job_graph_time_color_remaining']
 @tool0_color_actual=octoprint_config['octo_server_printer_tool_0_temp_graph_color_actual']
+@tool0_color_background=octoprint_config['octo_server_printer_tool_0_temp_graph_color_background']
 @tool0_color_target=octoprint_config['octo_server_printer_tool_0_temp_graph_color_target']
 @tool0_graph_enable=octoprint_config['octo_server_printer_tool_0_temp_graph_enable']
 
@@ -131,6 +140,20 @@ def getOctoPrintStatus(server_fqdn,port,key,endpoint,ssl_enable)
   end
   status_data
 end
+#hacky, but I don't want to require a gem
+#http://stackoverflow.com/questions/16026048/pretty-file-size-in-ruby
+class Integer
+  def to_filesize
+    {
+      'B'  => 1024,
+      'KB' => 1024 * 1024,
+      'MB' => 1024 * 1024 * 1024,
+      'GB' => 1024 * 1024 * 1024 * 1024,
+      'TB' => 1024 * 1024 * 1024 * 1024 * 1024
+    }.each_pair { |e, s| return "#{(self.to_f / (s / 1024)).round(2)}#{e}" if self < s }
+  end
+end
+
 #http://stackoverflow.com/questions/4136248/how-to-generate-a-human-readable-time-range-using-ruby-on-rails
 # :first_in sets how long it takes before the job is first run. In this case, it is run immediately
 SCHEDULER.every "#{@frequency}s", first_in: 0 do
@@ -147,16 +170,17 @@ SCHEDULER.every "#{@frequency}s", first_in: 0 do
       bed_target_datapoints<<bed_target_now
       bed_actual_datapoints=bed_actual_datapoints.take(@graph_depth.to_i)
       bed_target_datapoints=bed_target_datapoints.take(@graph_depth.to_i)
+      bed_colors="#{@bed_color_actual}:#{@bed_color_target}"
       bed_graphite = [
         {
-          target: "Actual Temp", datapoints: bed_actual_datapoints
+          target: "Actual: #{bed_actual}", datapoints: bed_actual_datapoints
         },
         {
-          target: "Target Temp", datapoints: bed_target_datapoints
+          target: "Target: #{bed_target}", datapoints: bed_target_datapoints
         }
       ]
 #      warn "OctoPrint: bed_graphite data: #{bed_graphite}"
-      send_event('octoprint_bed_graph', series: bed_graphite)
+      send_event('octoprint_bed_graph', series: bed_graphite, colors: bed_colors)
       sleep 1
     end
     if @tool0_graph_enable
@@ -168,16 +192,17 @@ SCHEDULER.every "#{@frequency}s", first_in: 0 do
       tool0_target_datapoints<<tool0_target_now
       tool0_actual_datapoints=tool0_actual_datapoints.take(@graph_depth.to_i)
       tool0_target_datapoints=tool0_target_datapoints.take(@graph_depth.to_i)
+      tool0_colors="#{@tool0_color_actual}:#{@tool0_color_target}"
       tool0_graphite = [
         {
-          target: "Actual Temp", datapoints: tool0_actual_datapoints
+          target: "Actual: #{tool0_actual}", datapoints: tool0_actual_datapoints
         },
         {
-          target: "Target Temp", datapoints: tool0_target_datapoints
+          target: "Target: #{tool0_target}", datapoints: tool0_target_datapoints
         }
       ]
 #      warn "OctoPrint: tool0_graphite data: #{tool0_graphite}"
-      send_event('octoprint_tool0_graph', series: tool0_graphite)
+      send_event('octoprint_tool0_graph', series: tool0_graphite, colors: tool0_colors )
     end
   end
 end
@@ -233,35 +258,38 @@ SCHEDULER.every "#{@frequency}s", first_in: 0 do
       estimated_print_time_now=[estimated_print_time,time]
       estimated_print_time_datapoints<<estimated_print_time_now
       estimated_print_time_datapoints=estimated_print_time_datapoints.take(@graph_depth.to_i)
+      time_colors="#{@time_color_estimated}:#{@time_color_remaining}:#{@time_color_elapsed}"
+      file_colors="#{@file_color_position}:#{@file_color_total}"
 #      warn "OctoPrint: completion:           #{completion}"
 #      warn "OctoPrint: print_time:           #{print_time}           (raw: #{_print_time})"
 #      warn "OctoPrint: print_time_left:      #{print_time_left}      (raw: #{_print_time_left})"
 #      warn "OctoPrint: estimated_print_time: #{estimated_print_time} (raw: #{_estimated_print_time})"
       job_graphite = [
         {
-          target: "Job Position", datapoints: file_position_datapoints
+          target: "Job Position: #{file_position.to_filesize}", datapoints: file_position_datapoints
         },
         {
-          target: "Job Total Size", datapoints: file_size_datapoints
+          target: "Job Total Size: #{file_size.to_filesize}", datapoints: file_size_datapoints
         },
       ]
       time_graphite = [
         {
-          target: "Print Time", datapoints: print_time_datapoints
+          target: "Estimated Total: #{estimated_print_time}#{@job_time_units_normalized}", datapoints: estimated_print_time_datapoints
         },
         {
-          target: "Print Time Left", datapoints: print_time_left_datapoints
+          target: "Remaining: #{print_time_left}#{@job_time_units_normalized}", datapoints: print_time_left_datapoints
         },
         {
-          target: "Estimated Print Time", datapoints: estimated_print_time_datapoints
+          target: "Elapsed: #{print_time}#{@job_time_units_normalized}", datapoints: print_time_datapoints
         }
+
       ]
 #      warn "OctoPrint: bed_graphite job: #{bed_graphite}"
-      send_event('octoprint_job_graph', series: job_graphite)
+      send_event('octoprint_job_graph', series: job_graphite, colors: file_colors)
       sleep 1
-      send_event('octoprint_time_graph', series: time_graphite)
+      send_event('octoprint_time_graph', series: time_graphite, colors: time_colors)
       sleep 1
-      send_event('octoprint_completion', value: completion, bgcolor: '333', fgcolor: '3c3')
+      send_event('octoprint_completion', value: completion, bgcolor: @completion_bgcolor, fgcolor: @completion_fgcolor)
     end
   end
 end
