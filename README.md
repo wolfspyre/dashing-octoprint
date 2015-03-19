@@ -1,5 +1,6 @@
 #Dashing-OctoPrint
 
+![OctoPrint Dashboard Snapshot](skitch.jpg)
 ####A templatized 3D printing dashboard
 
 This aims to be a [Dashing](http://shopify.github.io/dashing/#overview) widget and sample dashboard for viewing metrics and data from your [OctoPrint](http://octoprint.org) rig. This is developed against [OctoPi](https://github.com/guysoft/OctoPi).
