@@ -260,13 +260,13 @@ SCHEDULER.every "#{@frequency}s", first_in: 0 do
       ]
       time_graphite = [
         {
-          target: "Estimated Total: #{estimated_print_time}", datapoints: estimated_print_time_datapoints
+          target: "Estimated Total: #{estimated_print_time}#{@job_time_units_normalized}", datapoints: estimated_print_time_datapoints
         },
         {
-          target: "Remaining: #{print_time_left}", datapoints: print_time_left_datapoints
+          target: "Remaining: #{print_time_left}#{@job_time_units_normalized}", datapoints: print_time_left_datapoints
         },
         {
-          target: "Elapsed: #{print_time}", datapoints: print_time_datapoints
+          target: "Elapsed: #{print_time}#{@job_time_units_normalized}", datapoints: print_time_datapoints
         }
 
       ]
