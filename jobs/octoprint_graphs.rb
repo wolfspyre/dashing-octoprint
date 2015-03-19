@@ -24,17 +24,20 @@ end
 @bed_color_background=octoprint_config['octo_server_printer_bed_temp_graph_color_background']
 @bed_color_target=octoprint_config['octo_server_printer_bed_temp_graph_color_target']
 @bed_graph_enable=octoprint_config['octo_server_printer_bed_temp_graph_enable']
+@completion_bgcolor=octoprint_config['octo_server_completion_bgcolor']
+@completion_fgcolor=octoprint_config['octo_server_completion_fgcolor']
+@file_color_position=octoprint_config['octo_server_job_graph_file_color_position']
+@file_color_total=octoprint_config['octo_server_job_graph_file_color_total']
 @frequency=octoprint_config['octo_server_api_poll_interval']
 @graph_depth=octoprint_config['octo_server_graph_depth']
 @job_endpoint=octoprint_config['octo_server_api_job_endpoint']
+@job_graph_enable=octoprint_config['octo_server_job_graph_enable']
 @job_time_units=octoprint_config['octo_server_job_graph_time_units']
-
+@octo_server=octoprint_config['octo_server_fqdn']
+@printer_endpoint=octoprint_config['octo_server_api_printer_endpoint']
 @time_color_elapsed=octoprint_config['octo_server_job_graph_time_color_elapsed']
 @time_color_estimated=octoprint_config['octo_server_job_graph_time_color_estimated']
 @time_color_remaining=octoprint_config['octo_server_job_graph_time_color_remaining']
-@job_graph_enable=octoprint_config['octo_server_job_graph_enable']
-@octo_server=octoprint_config['octo_server_fqdn']
-@printer_endpoint=octoprint_config['octo_server_api_printer_endpoint']
 @tool0_color_actual=octoprint_config['octo_server_printer_tool_0_temp_graph_color_actual']
 @tool0_color_background=octoprint_config['octo_server_printer_tool_0_temp_graph_color_background']
 @tool0_color_target=octoprint_config['octo_server_printer_tool_0_temp_graph_color_target']
@@ -242,6 +245,7 @@ SCHEDULER.every "#{@frequency}s", first_in: 0 do
       estimated_print_time_datapoints<<estimated_print_time_now
       estimated_print_time_datapoints=estimated_print_time_datapoints.take(@graph_depth.to_i)
       time_colors="#{@time_color_estimated}:#{@time_color_remaining}:#{@time_color_elapsed}"
+      file_colors="#{@file_color_position}:#{@file_color_total}"
 #      warn "OctoPrint: completion:           #{completion}"
 #      warn "OctoPrint: print_time:           #{print_time}           (raw: #{_print_time})"
 #      warn "OctoPrint: print_time_left:      #{print_time_left}      (raw: #{_print_time_left})"
@@ -267,11 +271,11 @@ SCHEDULER.every "#{@frequency}s", first_in: 0 do
 
       ]
 #      warn "OctoPrint: bed_graphite job: #{bed_graphite}"
-      send_event('octoprint_job_graph', series: job_graphite)
+      send_event('octoprint_job_graph', series: job_graphite, colors: file_colors)
       sleep 1
       send_event('octoprint_time_graph', series: time_graphite, colors: time_colors)
       sleep 1
-      send_event('octoprint_completion', value: completion, bgcolor: '333', fgcolor: '3c3')
+      send_event('octoprint_completion', value: completion, bgcolor: @completion_bgcolor, fgcolor: @completion_fgcolor)
     end
   end
 end
