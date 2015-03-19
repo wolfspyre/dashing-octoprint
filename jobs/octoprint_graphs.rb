@@ -140,6 +140,20 @@ def getOctoPrintStatus(server_fqdn,port,key,endpoint,ssl_enable)
   end
   status_data
 end
+#hacky, but I don't want to require a gem
+#http://stackoverflow.com/questions/16026048/pretty-file-size-in-ruby
+class Integer
+  def to_filesize
+    {
+      'B'  => 1024,
+      'KB' => 1024 * 1024,
+      'MB' => 1024 * 1024 * 1024,
+      'GB' => 1024 * 1024 * 1024 * 1024,
+      'TB' => 1024 * 1024 * 1024 * 1024 * 1024
+    }.each_pair { |e, s| return "#{(self.to_f / (s / 1024)).round(2)}#{e}" if self < s }
+  end
+end
+
 #http://stackoverflow.com/questions/4136248/how-to-generate-a-human-readable-time-range-using-ruby-on-rails
 # :first_in sets how long it takes before the job is first run. In this case, it is run immediately
 SCHEDULER.every "#{@frequency}s", first_in: 0 do
@@ -252,10 +266,10 @@ SCHEDULER.every "#{@frequency}s", first_in: 0 do
 #      warn "OctoPrint: estimated_print_time: #{estimated_print_time} (raw: #{_estimated_print_time})"
       job_graphite = [
         {
-          target: "Job Position ", datapoints: file_position_datapoints
+          target: "Job Position: #{file_position.to_filesize}", datapoints: file_position_datapoints
         },
         {
-          target: "Job Total Size", datapoints: file_size_datapoints
+          target: "Job Total Size: #{file_position.to_filesize}", datapoints: file_size_datapoints
         },
       ]
       time_graphite = [
