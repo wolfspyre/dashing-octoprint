@@ -6,6 +6,8 @@ octo_server_api_printer_endpoint: '/api/printer'
 octo_server_api_ssl: true
 octo_server_fqdn: 'octoprint.example.com'
 octo_server_graph_depth: '300'
+octo_server_history_enable: true
+octo_server_history_file: 'logs/octoprint_history.yaml'
 octo_server_job_graph_enable: true
 octo_server_job_graph_time_units: 'minutes'
 octo_server_job_graph_time_color_elapsed: '#0f0'

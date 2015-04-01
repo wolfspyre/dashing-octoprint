@@ -30,6 +30,8 @@ end
 @file_color_total=octoprint_config['octo_server_job_graph_file_color_total']
 @frequency=octoprint_config['octo_server_api_poll_interval']
 @graph_depth=octoprint_config['octo_server_graph_depth']
+@history_enable=octoprint_config['octo_server_history_enable']
+@history_file=octoprint_config['octo_server_history_file']
 @job_endpoint=octoprint_config['octo_server_api_job_endpoint']
 @job_graph_enable=octoprint_config['octo_server_job_graph_enable']
 @job_time_units=octoprint_config['octo_server_job_graph_time_units']
@@ -43,6 +45,12 @@ end
 @tool0_color_target=octoprint_config['octo_server_printer_tool_0_temp_graph_color_target']
 @tool0_graph_enable=octoprint_config['octo_server_printer_tool_0_temp_graph_enable']
 
+if @history_enable
+warn   "OctoPrint: History enabled"
+octoHistoryFile = File.join(File.expand_path('..'), @history_file )
+octoprint_history = YAML.load_file(octoHistoryFile)
+warn   "OctoPrint: History: #{octoprint_history}"
+end
 case @job_time_units
 when 's', 'sec','seconds'
   @job_time_units_normalized='s'
