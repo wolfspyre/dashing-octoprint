@@ -94,17 +94,54 @@ end
 #send_event('http', series: graphite)
 #
 if @tool0_graph_enable
-  tool0_graph=[]
-  tool0_actual_datapoints=[]
-  tool0_target_datapoints=[]
+  if @history_enable
+    if octoprint_history[tool0_actual_datapoints]
+warn "OctoPrint: importing tool0_actual_datapoints from history file"
+      tool0_actual_datapoints=octoprint_history[tool0_actual_datapoints]
+    else
+warn "OctoPrint: History enabled, but tool0_actual_datapoints not found. Initializing"
+      tool0_actual_datapoints=[]
+    end
+    if octoprint_history[tool0_target_datapoints]
+warn "OctoPrint: importing tool0_target_datapoints from history file"
+      tool0_target_datapoints=octoprint_history[tool0_target_datapoints]
+    else
+warn "OctoPrint: History enabled, but tool0_target_datapoints not found. Initializing"
+      tool0_target_datapoints=[]
+    end
+  else
+warn "OctoPrint: History disabled. Initializing tool0 data"
+    tool0_actual_datapoints=[]
+    tool0_target_datapoints=[]
+  end
 end
 if @bed_graph_enable
-  bed_graph=[]
-  bed_actual_datapoints=[]
-  bed_target_datapoints=[]
+  if @history_enable
+    if octoprint_history[bed_actual_datapoints]
+warn "OctoPrint: importing bed_actual_datapoints from history file"
+      bed_actual_datapoints=octoprint_history[bed_actual_datapoints]
+    else
+warn "OctoPrint: History enabled, but bed_actual_datapoints not found. Initializing"
+      bed_actual_datapoints=[]
+    end
+    if octoprint_history[bed_target_datapoints]
+warn "OctoPrint: importing bed_target_datapoints from history file"
+      bed_target_datapoints=octoprint_history[bed_target_datapoints]
+    else
+warn "OctoPrint: History enabled, but bed_target_datapoints not found. Initializing"
+      bed_target_datapoints=[]
+    end
+  else
+warn "OctoPrint: History disabled. Initializing bed data"
+    bed_actual_datapoints=[]
+    bed_target_datapoints=[]
+  end
 end
+if @tool1_graph_enable
+  warn "Graphing of tool1 is not currently implemented. Pull requests welcome."
+end
+
 if @job_graph_enable
-  job_graph=[]
   completion_datapoints=[]
   estimated_print_time_datapoints=[]
   file_position_datapoints=[]
@@ -212,6 +249,22 @@ SCHEDULER.every "#{@frequency}s", first_in: 0 do
 #      warn "OctoPrint: tool0_graphite data: #{tool0_graphite}"
       send_event('octoprint_tool0_graph', series: tool0_graphite, colors: tool0_colors )
     end
+  end
+end
+#history job
+#TODO: should this be done in the other jobs instead? would have a greater chance
+#  at not losing data, but would increase writes, might introduce locking issues if jobs are parallelized?
+#
+if @history_enabled
+warn "OctoPrint: History: bed_graph"
+  SCHEDULER.every "#{@frequency}s", first_in: 0 do
+    octoprint_history[tool0_actual_datapoints]<<tool0_actual_datapoints
+    octoprint_history[tool0_target_datapoints]<<tool0_actual_datapoints
+    octoprint_history[bed_actual_datapoints]<<bed_actual_datapoints
+    octoprint_history[bed_target_datapoints]<<bed_target_datapoints
+    File.open(File.join(File.expand_path('..'), @history_file ), 'w'){|f|
+      f.write octoprint_history.to_yaml
+    }
   end
 end
 SCHEDULER.every "#{@frequency}s", first_in: 0 do
