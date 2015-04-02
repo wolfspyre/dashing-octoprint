@@ -9,6 +9,8 @@ This aims to be a [Dashing](http://shopify.github.io/dashing/#overview) widget a
 
 -	Clone [the repository](https://github.com/wolfspyre/dashing-octoprint)
 -	Run the `scripts/deploy.sh` shell script, which will perform the needed actions to install this widget.
+      	./scripts/deploy.sh /home/pi/dashing-plugins/dashing-octoprint parent_dir_of_install dashboard_install_dir
+
 -	Restart Dashing to pick up the new changes.
 -	Navigate to the newly installed octoprint dashboard in your browser, and revel in the dashboardy goodness of your octoprint rig.
 
