@@ -34,39 +34,186 @@ The graphs depend on [Jason Walton's Rickshawgraph plugin](https://gist.github.c
 
 The `octoprint_defaults.yaml` file tunes the behavior of the job. it is meant to provide you an example configuration of the configurable parameters. You are meant to create an `octoprint_overrides.yaml` file in the `conf.d` directory with your specific settings. This permits you to update the default configuration file automatically, while simultaneously maintaining a custom local configuration.
 
-`octo_server_api_job_endpoint`: *string* The endpoint to query for jobs. **Default:** '/api/job'
-`octo_server_api_key`: *string* Your OctoPrint API key. **Currently unnecessary**. May be required in the future. **Default:** 'CHANGEME'
-`octo_server_api_poll_interval`: '30'
-`octo_server_api_port`: '443'
-`octo_server_api_printer_endpoint`: '/api/printer'
-`octo_server_api_ssl`: true
-`octo_server_fqdn`: 'octoprint.example.com'
-`octo_server_graph_depth`: '300'
-`octo_server_history_enable`: true
-`octo_server_history_file`: 'logs/octoprint_history.yaml'
-`octo_server_job_graph_enable`: true
-`octo_server_job_graph_time_units`: 'minutes'
-`octo_server_job_graph_time_color_elapsed`: '#0f0'
-`octo_server_job_graph_time_color_estimated`: '#00f'
-`octo_server_job_graph_time_color_remaining`: '#f00'
-`octo_server_job_graph_file_color_position`: '#00f'
-`octo_server_job_graph_file_color_total`: '#f00'
-`octo_server_completion_fgcolor`: '#333'
-`octo_server_completion_bgcolor`: '#3c3'
-`octo_server_last_filename`: 'assets/images/octocam/last.jpeg'
-`octo_server_latest_filename`: 'assets/images/octocam/latest.jpeg'
-`octo_server_printer_bed_temp_graph_color_actual`: '#00ff00'
-`octo_server_printer_bed_temp_graph_color_background`: '#cccccc'
-`octo_server_printer_bed_temp_graph_color_target`: '#ff0000'
-`octo_server_printer_bed_temp_graph_enable`: true
-`octo_server_printer_tool_0_temp_graph_color_actual`: '#00ff00'
-`octo_server_printer_tool_0_temp_graph_color_background`: '#cccccc'
-`octo_server_printer_tool_0_temp_graph_color_target`: '#ff0000'
-`octo_server_printer_tool_0_temp_graph_enable`: true
-`octo_server_printer_tool_1_temp_graph_color_actual`: '#00ff00'
-`octo_server_printer_tool_1_temp_graph_color_target`: '#ff0000'
-`octo_server_printer_tool_1_temp_graph_enable`: false
-`octo_server_snapshot_url`: 'https`://octoprint.example.com/webcam/?action=snapshot'
-`octo_server_webcam_poll_interval`: '30'
-`octo_server_webcam_port`: '443'
-`octo_server_webcam_ssl`: true
+###Configuration Parameters
+
+* `octo_server_api_job_endpoint`
+(**string**) *Default:* `'/api/job'`
+  -  The endpoint to query for jobs
+
+
+* `octo_server_api_key`
+(**string**) *Default:* `'CHANGEME'`
+	- Your OctoPrint API key.
+	- **Currently unnecessary**. May be required in the future.
+
+
+* `octo_server_api_poll_interval`
+(**string**) *Default:* `'30'`
+	- How frequently the OctoPrint API should be polled.
+
+
+* `octo_server_api_port`
+(**string**) *Default:* `'443'`
+	- The port the OctoPrint API is listening on
+
+
+* `octo_server_api_printer_endpoint`
+(**string**) *Default:* `'/api/printer'`
+	- The OctoPrint API printer endpoint
+
+
+* `octo_server_api_ssl`
+(**boolean**) *Default:* true
+	- Whether to enable SSL when talking to the OctoPrint API
+
+
+
+* `octo_server_fqdn`
+(**string**) *Default:* `'octoprint.example.com'`
+	- The FQDN of your OctoPrint rig.
+
+
+* `octo_server_graph_depth`
+(**string**) *Default:* `'300'`
+	- The number of entries to display in the graph
+
+
+* `octo_server_history_enable`
+(**boolean**) *Default:* true
+	- Whether or not to store data to a history file to persist data across restarts.
+
+
+* `octo_server_history_file`
+(**string**) *Default:* `'history/octoprint_history.yaml'`
+	- The file to store history data in.
+
+
+* `octo_server_job_graph_enable`
+(**boolean**) *Default:* true
+	- Enablement toggle for the Octoprint server job
+
+
+* `octo_server_job_graph_time_units`
+(**string**) *Default:* `'minutes'`
+	- What units of time to display in the job graph.
+	- Supported options: [m, min, minutes, s, sec, seconds]
+
+
+* `octo_server_job_graph_time_color_elapsed`
+(**string**) *Default:* `'#0f0'`
+	- The color to use for the time elapsed in the job graph
+
+
+* `octo_server_job_graph_time_color_estimated`
+(**string**) *Default:* `'#00f'`
+	- The color to use for the estimated time in the job graph
+
+
+* `octo_server_job_graph_time_color_remaining`
+(**string**) *Default:* `'#f00'`
+	- The color to use for the time elapsed in the job graph
+
+
+* `octo_server_job_graph_file_color_position`
+(**string**) *Default:* `'#00f'`
+	- The color to use for the file position in the job graph
+
+
+* `octo_server_job_graph_file_color_total`
+(**string**) *Default:* `'#f00'`
+	- The color to use for the file total size in the job graph
+
+
+* `octo_server_completion_fgcolor`
+(**string**) *Default:* `'#333'`
+	- The foreground color to use for the completion widget
+
+
+* `octo_server_completion_bgcolor`
+(**string**) *Default:* `'#3c3'`
+	- The background color to use for the completion widget
+
+
+* `octo_server_last_filename`
+(**string**) *Default:* `'assets/images/octocam/last.jpeg'`
+	- The last file saved from the snapshot endpoint.
+
+
+* `octo_server_latest_filename`
+(**string**) *Default:* `'assets/images/octocam/latest.jpeg'`
+	- The latest file saved from the snapshot endpoint.
+
+
+* `octo_server_printer_bed_temp_graph_color_actual`
+(**string**) *Default:* `'#00ff00'`
+	- The color to graph the actual bed temperature.
+
+
+* `octo_server_printer_bed_temp_graph_color_background`
+(**string**) *Default:* `'#cccccc'`
+	- The background color for the bed temperature graph.
+
+
+* `octo_server_printer_bed_temp_graph_color_target`
+(**string**) *Default:* `'#ff0000'`
+	- The color to graph the target bed temperature.
+
+
+* `octo_server_printer_bed_temp_graph_enable`
+(**boolean**) *Default:* true
+	- Enablement toggle for the bed temperature graph job
+
+
+* `octo_server_printer_tool_0_temp_graph_color_actual`
+(**string**) *Default:* `'#00ff00'`
+	- The color to graph the current temperature of tool0.
+
+
+* `octo_server_printer_tool_0_temp_graph_color_background`
+(**string**) *Default:* `'#cccccc'`
+	- The background color for the tool0 temperature graph.
+
+
+* `octo_server_printer_tool_0_temp_graph_color_target`
+(**string**) *Default:* `'#ff0000'`
+	- The color to graph the target temperature of tool0.
+
+
+* `octo_server_printer_tool_0_temp_graph_enable`
+(**boolean**) *Default:* true
+	- Enablement toggle for the tool0 temperature graph job
+
+
+* `octo_server_printer_tool_1_temp_graph_color_actual`
+(**string**) *Default:* `'#00ff00'`
+	- The color to graph the current temperature of tool0.
+
+
+* `octo_server_printer_tool_1_temp_graph_color_target`
+(**string**) *Default:* `'#ff0000'`
+	- The color to graph the target temperature of tool1.
+
+
+* `octo_server_printer_tool_1_temp_graph_enable`
+(**boolean**) *Default:* false
+	- Enablement toggle for the tool1 temperature graph job
+
+
+* `octo_server_snapshot_url`
+(**string**) *Default:* `'https://octoprint.example.com/webcam/?action=snapshot'`
+	- The url we should collect the latest snapshot from.
+
+
+* `octo_server_webcam_poll_interval`
+(**string**) *Default:* `'30'
+	- How frequently to poll the snapshot URL.
+
+
+* `octo_server_webcam_port`
+(**string**) *Default:* `'443'
+	- The tcp port to connect to for the snapshot endpoint
+
+
+* `octo_server_webcam_ssl`
+(**boolean**) *Default:* true
+	- Whether or not to connect to the snapshot endpoint via SSL
