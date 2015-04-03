@@ -58,23 +58,19 @@ if @history_enable
   if File.exists?(octoHistoryFile)
     warn   "OctoPrint: History file exists:"
     octoprint_history = YAML.load_file(octoHistoryFile)
-    warn   "OctoPrint: History: #{octoprint_history}"
+#    warn   "OctoPrint: History: #{octoprint_history}"
   else
     warn   "OctoPrint: New history file initialized"
     octoprint_history=Hash.new
-
-    octoprint_history['bed_actual_datapoints']=Array.new
-    octoprint_history['bed_target_datapoints']=Array.new
-    octoprint_history['tool0_actual_datapoints']=Array.new
-    octoprint_history['tool0_target_datapoints']=Array.new
-    octoprint_history['completion_datapoints']=Array.new
-    octoprint_history['estimated_print_time_datapoints']=Array.new
-    octoprint_history['file_position_datapoints']=Array.new
-    octoprint_history['file_size_datapoints']=Array.new
-    octoprint_history['print_time_datapoints']=Array.new
-    octoprint_history['print_time_left_datapoints']=Array.new
+    ['bed_actual_datapoints', 'bed_target_datapoints',
+    'tool0_actual_datapoints', 'tool0_target_datapoints',
+    'completion_datapoints', 'estimated_print_time_datapoints',
+    'file_position_datapoints', 'file_size_datapoints',
+    'print_time_datapoints', 'print_time_left_datapoints',].each do |hist|
+      octoprint_history["#{hist}"]=Array.new
+    end
     octoprint_history.to_yaml
-    warn   "OctoPrint: History: #{octoprint_history}"
+#    warn   "OctoPrint: History: #{octoprint_history}"
     File.open(octoHistoryFile, "w") { |f|
       f.write octoprint_history
     }
@@ -146,22 +142,21 @@ if @tool0_graph_enable
   end
 end
 if @bed_graph_enable
-  bed_actual_datapoints=[]
-  bed_target_datapoints=[]
   if @history_enable
-    if octoprint_history['bed_actual_datapoints'] && !octoprint_history['bed_actual_datapoints'].empty?
-      bed_actual_datapoints=octoprint_history['bed_actual_datapoints']
-    else
-      warn "OctoPrint: History enabled, but bed_actual_datapoints not found. Initializing"
-    end
-    if octoprint_history['bed_target_datapoints'] && !octoprint_history['bed_target_datapoints'].empty?
-      warn "OctoPrint: importing bed_target_datapoints from history file"
-      bed_target_datapoints=octoprint_history['bed_target_datapoints']
-    else
-      warn "OctoPrint: History enabled, but bed_target_datapoints not found. Initializing"
+    [ 'bed_actual_datapoints', 'bed_target_datapoints'].each do |var|
+      if octoprint_history["#{var}"] && !octoprint_history["#{var}"].empty?
+        warn "OctoPrint: Bed History enabled. Populating #{var} from file."
+        instance_variable_set("@#{var}", octoprint_history["#{var}"])
+      else
+        warn "OctoPrint: Bed History enabled but #{var} nonexistent or empty. Creating"
+        instance_variable_set("@#{var}", Array.new)
+        octoprint_history["#{var}"]=Array.new
+      end
     end
   else
-    warn "OctoPrint: History disabled. Initializing bed data"
+#    warn "OctoPrint: History disabled. Initializing bed data"
+      @bed_actual_datapoints=[]
+      @bed_target_datapoints=[]
   end
 end
 if @tool1_graph_enable
@@ -172,7 +167,7 @@ if @job_graph_enable
   if @history_enable
     [ 'completion_datapoints', 'estimated_print_time_datapoints', 'file_position_datapoints', 'file_size_datapoints', 'print_time_datapoints', 'print_time_left_datapoints'].each do |var|
       if octoprint_history["#{var}"] && !octoprint_history["#{var}"].empty?
-        warn "OctoPrint: Job History enabled. Populating #{var} from file."
+#        warn "OctoPrint: Job History enabled. Populating #{var} from file."
         instance_variable_set("@#{var}", octoprint_history["#{var}"])
       else
         warn "OctoPrint: Job History enabled but #{var} nonexistent or empty. Creating"
@@ -181,12 +176,12 @@ if @job_graph_enable
       end
     end
   else
-    completion_datapoints=[]
-    estimated_print_time_datapoints=[]
-    file_position_datapoints=[]
-    file_size_datapoints=[]
-    print_time_datapoints=[]
-    print_time_left_datapoints=[]
+    @completion_datapoints=[]
+    @estimated_print_time_datapoints=[]
+    @file_position_datapoints=[]
+    @file_size_datapoints=[]
+    @print_time_datapoints=[]
+    @print_time_left_datapoints=[]
   end
 
 
@@ -254,15 +249,15 @@ SCHEDULER.every "#{@frequency}s", first_in: 0 do
       bed_target=data['temps']['bed']['target'].to_i
       bed_actual_now=[bed_actual,time]
       bed_target_now=[bed_target,time]
-      bed_actual_datapoints<<bed_actual_now
-      bed_target_datapoints<<bed_target_now
+      @bed_actual_datapoints<<bed_actual_now
+      @bed_target_datapoints<<bed_target_now
       bed_colors="#{@bed_color_actual}:#{@bed_color_target}"
       bed_graphite = [
         {
-          target: "Actual: #{bed_actual}", datapoints: bed_actual_datapoints
+          target: "Actual: #{bed_actual}", datapoints: @bed_actual_datapoints
         },
         {
-          target: "Target: #{bed_target}", datapoints: bed_target_datapoints
+          target: "Target: #{bed_target}", datapoints: @bed_target_datapoints
         }
       ]
 #      warn "OctoPrint: bed_graphite data: #{bed_graphite}"
@@ -271,11 +266,11 @@ SCHEDULER.every "#{@frequency}s", first_in: 0 do
         octoprint_history['bed_actual_datapoints']<<bed_actual_now
         octoprint_history['bed_target_datapoints']<<bed_target_now
       end
-      if bed_actual_datapoints.length >= @graph_depth.to_i
-        bed_actual_datapoints=bed_actual_datapoints.take(@graph_depth.to_i)
+      if @bed_actual_datapoints.length >= @graph_depth.to_i
+        @bed_actual_datapoints=@bed_actual_datapoints.take(@graph_depth.to_i)
       end
-      if bed_target_datapoints.length >= @graph_depth.to_i
-        bed_target_datapoints=bed_target_datapoints.take(@graph_depth.to_i)
+      if @bed_target_datapoints.length >= @graph_depth.to_i
+        @bed_target_datapoints=@bed_target_datapoints.take(@graph_depth.to_i)
       end
     end
     if @tool0_graph_enable
@@ -318,13 +313,20 @@ SCHEDULER.every "#{@frequency}s", first_in: 0 do
   warn "OctoPrint: History Job enabled"
     if @history_enable
       warn "OctoPrint: History enabled"
+      octoprint_history.each_pair do |k,v|
+        if v.length >= @graph_depth.to_i
+          warn "OctoPrint: History depth: #{k}: #{v.length} Trimming"
+          !v = v.take(@graph_depth.to_i)
+        else
+          warn "OctoPrint: History depth: #{k}: #{v.length} "
+        end
+      end
+#      warn "OctoPrint: History job Writing #{octoprint_history} to #{@history_file}"
+      warn "OctoPrint: History job Writing to #{@history_file}"
+
       File.open(@history_file, 'w'){|f|
         f.write octoprint_history.to_yaml
       }
-      warn "OctoPrint: History job Writing #{octoprint_history} to #{@history_file}"
-      octoprint_history.each_pair do |k,v|
-        warn "OctoPrint: History depth: #{k}: #{v.length} "
-      end
     else
       warn "OctoPrint: History disabled"
     end
