@@ -16,17 +16,17 @@ CONFFILE="octoprint_defaults.yaml"
 declare -a WIDGETS=("octocam" "octoprint")
 declare -a DASHBOARDS=("octoprint.erb")
 declare -a JOBS=("octoprint_snapshot.rb" "octoprint_status.rb" "octoprint_graphs.rb")
-declare -a CREATE_DIRS=("assets/images/octocam")
+declare -a CREATE_DIRS=("assets/images/octocam" "history")
 ################################################################################
 
 usage () {
   echo -e "Usage: $0 plugin-path parent-dir  dashboard-dir" >>/dev/stderr
-  echo -e "  \033[1;33mplugin-path\033[0m:   The path where this repository is cloned." >>/dev/stderr
-  echo -e "  \033[1;33mdashboard-dir\033[0m: The subdirectory of parent-dir where the dashing instance is stored." >>/dev/stderr
-  echo -e "  \033[1;33mparent-dir\033[0m:    The directory wherein conf.d will be created if it does not exist." >>/dev/stderr
-  echo -e "  \033[32mExample\033[0m: $0 \033[1;33m/home/${DEFAULTUSER}/dashing-plugins/${REPONAME} /home/${DEFAULTUSER}/ ${DEFAULTDASHBOARD}\033[0m" >>/dev/stderr
+  echo -e "  \033[0;34mplugin-path\033[0m:   The path where this repository is cloned." >>/dev/stderr
+  echo -e "  \033[0;35mparent-dir\033[0m:    The directory wherein conf.d will be created if it does not exist." >>/dev/stderr
+  echo -e "  \033[0;36mdashboard-dir\033[0m: The subdirectory of parent-dir where the dashing instance is stored." >>/dev/stderr
+  echo -e "  \033[32mExample\033[0m: $0 \033[0;34m/home/${DEFAULTUSER}/dashing-plugins/${REPONAME} \033[0;35m/home/${DEFAULTUSER}/ \033[0;36m${DEFAULTDASHBOARD}\033[0m" >>/dev/stderr
   echo -e "Debug statements will be output if the variable DEBUG exists; " >>/dev/stderr
-  echo -e "  \033[32mExample\033[0m: DEBUG=true $0 \033[1;33m/home/${DEFAULTUSER}/dashing-plugins/${REPONAME} /home/${DEFAULTUSER} ${DEFAULTDASHBOARD}\033[0m" >>/dev/stderr
+  echo -e "  \033[32mExample\033[0m: DEBUG=true $0 \033[0;34m/home/${DEFAULTUSER}/dashing-plugins/${REPONAME}\033[0m \033[0;35m/home/${DEFAULTUSER}\033[0m \033[0;36m${DEFAULTDASHBOARD}\033[0m" >>/dev/stderr
 }
 
 error () {
