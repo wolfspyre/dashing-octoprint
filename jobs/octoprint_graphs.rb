@@ -46,11 +46,27 @@ end
 @tool0_graph_enable=octoprint_config['octo_server_printer_tool_0_temp_graph_enable']
 
 if @history_enable
-warn   "OctoPrint: History enabled"
-octoHistoryFile = File.join(File.expand_path('..'), @history_file )
-octoprint_history = YAML.load_file(octoHistoryFile)
-warn   "OctoPrint: History: #{octoprint_history}"
+  warn   "OctoPrint: History enabled"
+  octoHistoryFile=@history_file
+  if File.exists?(octoHistoryFile)
+    warn   "OctoPrint: History file exists:"
+    octoprint_history = YAML.load_file(octoHistoryFile)
+    warn   "OctoPrint: History: #{octoprint_history}"
+  else
+    warn   "OctoPrint: New history file initialized"
+    octoprint_history=["#OctoPrint History created #{Time.now}"]
+    octoprint_history['bed_actual_datapoints']=[]
+    octoprint_history['bed_target_datapoints']=[]
+    octoprint_history['tool0_actual_datapoints']=[]
+    octoprint_history['tool0_target_datapoints']=[]
+    octoprint_history.to_yaml
+    warn   "OctoPrint: History: #{octoprint_history}"
+    File.open(octoHistoryFile, "w") { |f|
+      f.write octoprint_history
+    }
+  end
 end
+
 case @job_time_units
 when 's', 'sec','seconds'
   @job_time_units_normalized='s'
@@ -95,38 +111,40 @@ end
 #
 if @tool0_graph_enable
   if @history_enable
-    if octoprint_history[tool0_actual_datapoints]
-warn "OctoPrint: importing tool0_actual_datapoints from history file"
-      tool0_actual_datapoints=octoprint_history[tool0_actual_datapoints]
+    tool0_actual_datapoints=[]
+    tool0_target_datapoints=[]
+    if octoprint_history['tool0_actual_datapoints']
+      warn "OctoPrint: importing tool0_actual_datapoints from history file"
+      tool0_actual_datapoints<<octoprint_history['tool0_actual_datapoints']
     else
-warn "OctoPrint: History enabled, but tool0_actual_datapoints not found. Initializing"
+      warn "OctoPrint: History enabled, but tool0_actual_datapoints not found. Initializing"
       tool0_actual_datapoints=[]
     end
-    if octoprint_history[tool0_target_datapoints]
-warn "OctoPrint: importing tool0_target_datapoints from history file"
-      tool0_target_datapoints=octoprint_history[tool0_target_datapoints]
+    if octoprint_history['tool0_target_datapoints']
+      warn "OctoPrint: importing tool0_target_datapoints from history file"
+      tool0_target_datapoints<<octoprint_history['tool0_target_datapoints']
     else
-warn "OctoPrint: History enabled, but tool0_target_datapoints not found. Initializing"
+      warn "OctoPrint: History enabled, but tool0_target_datapoints not found. Initializing"
       tool0_target_datapoints=[]
     end
   else
-warn "OctoPrint: History disabled. Initializing tool0 data"
+    warn "OctoPrint: History disabled. Initializing tool0 data"
     tool0_actual_datapoints=[]
     tool0_target_datapoints=[]
   end
 end
 if @bed_graph_enable
   if @history_enable
-    if octoprint_history[bed_actual_datapoints]
+    if octoprint_history['bed_actual_datapoints']
 warn "OctoPrint: importing bed_actual_datapoints from history file"
-      bed_actual_datapoints=octoprint_history[bed_actual_datapoints]
+      bed_actual_datapoints=octoprint_history['bed_actual_datapoints']
     else
 warn "OctoPrint: History enabled, but bed_actual_datapoints not found. Initializing"
       bed_actual_datapoints=[]
     end
-    if octoprint_history[bed_target_datapoints]
+    if octoprint_history['bed_target_datapoints']
 warn "OctoPrint: importing bed_target_datapoints from history file"
-      bed_target_datapoints=octoprint_history[bed_target_datapoints]
+      bed_target_datapoints=octoprint_history['bed_target_datapoints']
     else
 warn "OctoPrint: History enabled, but bed_target_datapoints not found. Initializing"
       bed_target_datapoints=[]
@@ -237,6 +255,18 @@ SCHEDULER.every "#{@frequency}s", first_in: 0 do
       tool0_target_datapoints<<tool0_target_now
       tool0_actual_datapoints=tool0_actual_datapoints.take(@graph_depth.to_i)
       tool0_target_datapoints=tool0_target_datapoints.take(@graph_depth.to_i)
+
+      if @history_enable
+        warn "OctoPrint: tool0 History enabled"
+        octoprint_history['tool0_actual_datapoints']<<tool0_actual_datapoints
+        octoprint_history['tool0_target_datapoints']<<tool0_actual_datapoints
+        File.open(@history_file, 'w'){|f|
+          f.write octoprint_history.to_yaml
+        }
+    warn "OctoPrint: History job Writing #{octoprint_history} to #{@history_file}"
+      else
+        warn "OctoPrint: tool0 History disabled"
+      end
       tool0_colors="#{@tool0_color_actual}:#{@tool0_color_target}"
       tool0_graphite = [
         {
@@ -255,18 +285,19 @@ end
 #TODO: should this be done in the other jobs instead? would have a greater chance
 #  at not losing data, but would increase writes, might introduce locking issues if jobs are parallelized?
 #
-if @history_enabled
-warn "OctoPrint: History: bed_graph"
-  SCHEDULER.every "#{@frequency}s", first_in: 0 do
-    octoprint_history[tool0_actual_datapoints]<<tool0_actual_datapoints
-    octoprint_history[tool0_target_datapoints]<<tool0_actual_datapoints
-    octoprint_history[bed_actual_datapoints]<<bed_actual_datapoints
-    octoprint_history[bed_target_datapoints]<<bed_target_datapoints
-    File.open(File.join(File.expand_path('..'), @history_file ), 'w'){|f|
-      f.write octoprint_history.to_yaml
-    }
-  end
-end
+#SCHEDULER.every "#{@frequency}s", first_in: 0 do
+#  if @history_enable
+#warn "OctoPrint: History Job enabled"
+#    octoprint_history['bed_actual_datapoints']<<bed_actual_datapoints
+#    octoprint_history['bed_target_datapoints']<<bed_target_datapoints
+#    File.open(@history_file, 'w'){|f|
+#      f.write octoprint_history.to_yaml
+#    }
+#warn "OctoPrint: History job Writing #{octoprint_history} to #{@history_file}"
+#  else
+#warn "OctoPrint: History Job disabled"
+#  end
+#end
 SCHEDULER.every "#{@frequency}s", first_in: 0 do
   if @job_graph_enable
 	  job = getOctoPrintStatus(@octo_server,@api_port,@api_key,@job_endpoint,@api_ssl_enable)
