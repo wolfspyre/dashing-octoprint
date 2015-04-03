@@ -76,7 +76,7 @@ The `octoprint_defaults.yaml` file tunes the behavior of the job. it is meant to
 
 
 * `octo_server_graph_depth`
-(**string**) *Default:* `'300'`
+(**string**) *Default:* `'99'`
 	- The number of entries to display in the graph
 
 
