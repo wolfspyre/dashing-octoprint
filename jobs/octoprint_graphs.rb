@@ -16,7 +16,7 @@ if File.exists?(octoConfOverride)
 #warn "OctoPrint: Merging Override"
   octoprint_config = octoprint_config.merge(YAML.load_file(octoConfOverride))
 end
-
+@graph_depth_max=99
 @api_key=octoprint_config['octo_server_api_key']
 @api_port=octoprint_config['octo_server_api_port']
 @api_ssl_enable=octoprint_config['octo_server_api_ssl']
@@ -29,7 +29,7 @@ end
 @file_color_position=octoprint_config['octo_server_job_graph_file_color_position']
 @file_color_total=octoprint_config['octo_server_job_graph_file_color_total']
 @frequency=octoprint_config['octo_server_api_poll_interval']
-@graph_depth=octoprint_config['octo_server_graph_depth']
+@graph_depth_file=octoprint_config['octo_server_graph_depth']
 @history_enable=octoprint_config['octo_server_history_enable']
 @history_file=octoprint_config['octo_server_history_file']
 @job_endpoint=octoprint_config['octo_server_api_job_endpoint']
@@ -45,6 +45,13 @@ end
 @tool0_color_target=octoprint_config['octo_server_printer_tool_0_temp_graph_color_target']
 @tool0_graph_enable=octoprint_config['octo_server_printer_tool_0_temp_graph_enable']
 
+if @graph_depth_file.to_i > @graph_depth_max
+  @graph_depth = @graph_depth_max
+  warn "OctoPrint: Graph Depth greater than 99 is unsupported. "
+else
+  @graph_depth = @graph_depth_file
+end
+
 if @history_enable
   warn   "OctoPrint: History enabled"
   octoHistoryFile=@history_file
@@ -54,11 +61,18 @@ if @history_enable
     warn   "OctoPrint: History: #{octoprint_history}"
   else
     warn   "OctoPrint: New history file initialized"
-    octoprint_history=["#OctoPrint History created #{Time.now}"]
-    octoprint_history['bed_actual_datapoints']=[]
-    octoprint_history['bed_target_datapoints']=[]
-    octoprint_history['tool0_actual_datapoints']=[]
-    octoprint_history['tool0_target_datapoints']=[]
+    octoprint_history=Hash.new
+
+    octoprint_history['bed_actual_datapoints']=Array.new
+    octoprint_history['bed_target_datapoints']=Array.new
+    octoprint_history['tool0_actual_datapoints']=Array.new
+    octoprint_history['tool0_target_datapoints']=Array.new
+    octoprint_history['completion_datapoints']=Array.new
+    octoprint_history['estimated_print_time_datapoints']=Array.new
+    octoprint_history['file_position_datapoints']=Array.new
+    octoprint_history['file_size_datapoints']=Array.new
+    octoprint_history['print_time_datapoints']=Array.new
+    octoprint_history['print_time_left_datapoints']=Array.new
     octoprint_history.to_yaml
     warn   "OctoPrint: History: #{octoprint_history}"
     File.open(octoHistoryFile, "w") { |f|
@@ -110,49 +124,44 @@ end
 #send_event('http', series: graphite)
 #
 if @tool0_graph_enable
+  tool0_actual_datapoints=[]
+  tool0_target_datapoints=[]
   if @history_enable
-    tool0_actual_datapoints=[]
-    tool0_target_datapoints=[]
-    if octoprint_history['tool0_actual_datapoints']
+    if octoprint_history['tool0_actual_datapoints'] && !octoprint_history['tool0_actual_datapoints'].empty?
       warn "OctoPrint: importing tool0_actual_datapoints from history file"
-      tool0_actual_datapoints<<octoprint_history['tool0_actual_datapoints']
+      tool0_actual_datapoints=octoprint_history['tool0_actual_datapoints']
     else
-      warn "OctoPrint: History enabled, but tool0_actual_datapoints not found. Initializing"
-      tool0_actual_datapoints=[]
+#      warn "OctoPrint: History enabled, but tool0_actual_datapoints not found. Initializing"
+#      tool0_actual_datapoints=[]
     end
-    if octoprint_history['tool0_target_datapoints']
+    if octoprint_history['tool0_target_datapoints'] && !octoprint_history['tool0_target_datapoints'].empty?
       warn "OctoPrint: importing tool0_target_datapoints from history file"
-      tool0_target_datapoints<<octoprint_history['tool0_target_datapoints']
+      tool0_target_datapoints=octoprint_history['tool0_target_datapoints']
     else
       warn "OctoPrint: History enabled, but tool0_target_datapoints not found. Initializing"
       tool0_target_datapoints=[]
     end
   else
     warn "OctoPrint: History disabled. Initializing tool0 data"
-    tool0_actual_datapoints=[]
-    tool0_target_datapoints=[]
   end
 end
 if @bed_graph_enable
+  bed_actual_datapoints=[]
+  bed_target_datapoints=[]
   if @history_enable
-    if octoprint_history['bed_actual_datapoints']
-warn "OctoPrint: importing bed_actual_datapoints from history file"
+    if octoprint_history['bed_actual_datapoints'] && !octoprint_history['bed_actual_datapoints'].empty?
       bed_actual_datapoints=octoprint_history['bed_actual_datapoints']
     else
-warn "OctoPrint: History enabled, but bed_actual_datapoints not found. Initializing"
-      bed_actual_datapoints=[]
+      warn "OctoPrint: History enabled, but bed_actual_datapoints not found. Initializing"
     end
-    if octoprint_history['bed_target_datapoints']
-warn "OctoPrint: importing bed_target_datapoints from history file"
+    if octoprint_history['bed_target_datapoints'] && !octoprint_history['bed_target_datapoints'].empty?
+      warn "OctoPrint: importing bed_target_datapoints from history file"
       bed_target_datapoints=octoprint_history['bed_target_datapoints']
     else
-warn "OctoPrint: History enabled, but bed_target_datapoints not found. Initializing"
-      bed_target_datapoints=[]
+      warn "OctoPrint: History enabled, but bed_target_datapoints not found. Initializing"
     end
   else
-warn "OctoPrint: History disabled. Initializing bed data"
-    bed_actual_datapoints=[]
-    bed_target_datapoints=[]
+    warn "OctoPrint: History disabled. Initializing bed data"
   end
 end
 if @tool1_graph_enable
@@ -160,12 +169,28 @@ if @tool1_graph_enable
 end
 
 if @job_graph_enable
-  completion_datapoints=[]
-  estimated_print_time_datapoints=[]
-  file_position_datapoints=[]
-  file_size_datapoints=[]
-  print_time_datapoints=[]
-  print_time_left_datapoints=[]
+  if @history_enable
+    [ 'completion_datapoints', 'estimated_print_time_datapoints', 'file_position_datapoints', 'file_size_datapoints', 'print_time_datapoints', 'print_time_left_datapoints'].each do |var|
+      if octoprint_history["#{var}"] && !octoprint_history["#{var}"].empty?
+        warn "OctoPrint: Job History enabled. Populating #{var} from file."
+        instance_variable_set("@#{var}", octoprint_history["#{var}"])
+      else
+        warn "OctoPrint: Job History enabled but #{var} nonexistent or empty. Creating"
+        instance_variable_set("@#{var}", Array.new)
+        octoprint_history["#{var}"]=Array.new
+      end
+    end
+  else
+    completion_datapoints=[]
+    estimated_print_time_datapoints=[]
+    file_position_datapoints=[]
+    file_size_datapoints=[]
+    print_time_datapoints=[]
+    print_time_left_datapoints=[]
+  end
+
+
+
 end
 def getOctoPrintStatus(server_fqdn,port,key,endpoint,ssl_enable)
   begin
@@ -231,8 +256,6 @@ SCHEDULER.every "#{@frequency}s", first_in: 0 do
       bed_target_now=[bed_target,time]
       bed_actual_datapoints<<bed_actual_now
       bed_target_datapoints<<bed_target_now
-      bed_actual_datapoints=bed_actual_datapoints.take(@graph_depth.to_i)
-      bed_target_datapoints=bed_target_datapoints.take(@graph_depth.to_i)
       bed_colors="#{@bed_color_actual}:#{@bed_color_target}"
       bed_graphite = [
         {
@@ -244,7 +267,16 @@ SCHEDULER.every "#{@frequency}s", first_in: 0 do
       ]
 #      warn "OctoPrint: bed_graphite data: #{bed_graphite}"
       send_event('octoprint_bed_graph', series: bed_graphite, colors: bed_colors)
-      sleep 1
+      if @history_enable
+        octoprint_history['bed_actual_datapoints']<<bed_actual_now
+        octoprint_history['bed_target_datapoints']<<bed_target_now
+      end
+      if bed_actual_datapoints.length >= @graph_depth.to_i
+        bed_actual_datapoints=bed_actual_datapoints.take(@graph_depth.to_i)
+      end
+      if bed_target_datapoints.length >= @graph_depth.to_i
+        bed_target_datapoints=bed_target_datapoints.take(@graph_depth.to_i)
+      end
     end
     if @tool0_graph_enable
       tool0_actual=data['temps']['tool0']['actual'].to_i
@@ -253,20 +285,6 @@ SCHEDULER.every "#{@frequency}s", first_in: 0 do
       tool0_target_now=[tool0_target,time]
       tool0_actual_datapoints<<tool0_actual_now
       tool0_target_datapoints<<tool0_target_now
-      tool0_actual_datapoints=tool0_actual_datapoints.take(@graph_depth.to_i)
-      tool0_target_datapoints=tool0_target_datapoints.take(@graph_depth.to_i)
-
-      if @history_enable
-        warn "OctoPrint: tool0 History enabled"
-        octoprint_history['tool0_actual_datapoints']<<tool0_actual_datapoints
-        octoprint_history['tool0_target_datapoints']<<tool0_actual_datapoints
-        File.open(@history_file, 'w'){|f|
-          f.write octoprint_history.to_yaml
-        }
-    warn "OctoPrint: History job Writing #{octoprint_history} to #{@history_file}"
-      else
-        warn "OctoPrint: tool0 History disabled"
-      end
       tool0_colors="#{@tool0_color_actual}:#{@tool0_color_target}"
       tool0_graphite = [
         {
@@ -278,6 +296,16 @@ SCHEDULER.every "#{@frequency}s", first_in: 0 do
       ]
 #      warn "OctoPrint: tool0_graphite data: #{tool0_graphite}"
       send_event('octoprint_tool0_graph', series: tool0_graphite, colors: tool0_colors )
+      if @history_enable
+        octoprint_history['tool0_actual_datapoints']<<tool0_actual_now
+        octoprint_history['tool0_target_datapoints']<<tool0_target_now
+      end
+      if tool0_actual_datapoints.length >= @graph_depth.to_i
+        tool0_actual_datapoints=tool0_actual_datapoints.take(@graph_depth.to_i)
+      end
+      if tool0_target_datapoints.length >= @graph_depth.to_i
+        tool0_target_datapoints=tool0_target_datapoints.take(@graph_depth.to_i)
+      end
     end
   end
 end
@@ -285,9 +313,24 @@ end
 #TODO: should this be done in the other jobs instead? would have a greater chance
 #  at not losing data, but would increase writes, might introduce locking issues if jobs are parallelized?
 #
-#SCHEDULER.every "#{@frequency}s", first_in: 0 do
-#  if @history_enable
-#warn "OctoPrint: History Job enabled"
+SCHEDULER.every "#{@frequency}s", first_in: 0 do
+  if @history_enable
+  warn "OctoPrint: History Job enabled"
+    if @history_enable
+      warn "OctoPrint: History enabled"
+      File.open(@history_file, 'w'){|f|
+        f.write octoprint_history.to_yaml
+      }
+      warn "OctoPrint: History job Writing #{octoprint_history} to #{@history_file}"
+      octoprint_history.each_pair do |k,v|
+        warn "OctoPrint: History depth: #{k}: #{v.length} "
+      end
+    else
+      warn "OctoPrint: History disabled"
+    end
+  end
+end
+
 #    octoprint_history['bed_actual_datapoints']<<bed_actual_datapoints
 #    octoprint_history['bed_target_datapoints']<<bed_target_datapoints
 #    File.open(@history_file, 'w'){|f|
@@ -308,19 +351,13 @@ SCHEDULER.every "#{@frequency}s", first_in: 0 do
 
       completion=(job['progress']['completion'].to_f).round(2)
       completion_now=[completion,time]
-      completion_datapoints<<completion_now
-      completion_datapoints=completion_datapoints.take(@graph_depth.to_i)
-
+      @completion_datapoints<<completion_now
       file_position=job['progress']['filepos'].to_i
       file_position_now=[file_position,time]
-      file_position_datapoints<<file_position_now
-      file_position_datapoints=file_position_datapoints.take(@graph_depth.to_i)
-
+      @file_position_datapoints<<file_position_now
       file_size=job['job']['file']['size'].to_i
       file_size_now=[file_size,time]
-      file_size_datapoints<<file_size_now
-      file_size_datapoints=file_size_datapoints.take(@graph_depth.to_i)
-
+      @file_size_datapoints<<file_size_now
       _print_time=job['progress']['printTime'].to_i
       if @job_time_units_normalized == 'm'
         print_time = sec_to_min(_print_time)
@@ -328,9 +365,7 @@ SCHEDULER.every "#{@frequency}s", first_in: 0 do
         print_time = _print_time
       end
       print_time_now=[print_time,time]
-      print_time_datapoints<<print_time_now
-      print_time_datapoints=print_time_datapoints.take(@graph_depth.to_i)
-
+      @print_time_datapoints<<print_time_now
       _print_time_left=job['progress']['printTimeLeft'].to_i
       if @job_time_units_normalized == 'm'
         print_time_left = sec_to_min(_print_time_left)
@@ -338,9 +373,7 @@ SCHEDULER.every "#{@frequency}s", first_in: 0 do
         print_time_left = _print_time_left
       end
       print_time_left_now=[print_time_left,time]
-      print_time_left_datapoints<<print_time_left_now
-      print_time_left_datapoints=print_time_left_datapoints.take(@graph_depth.to_i)
-
+      @print_time_left_datapoints<<print_time_left_now
       _estimated_print_time=job['job']['estimatedPrintTime'].to_i
       if @job_time_units_normalized == 'm'
         estimated_print_time = sec_to_min(_estimated_print_time)
@@ -348,8 +381,7 @@ SCHEDULER.every "#{@frequency}s", first_in: 0 do
         estimated_print_time = _estimated_print_time
       end
       estimated_print_time_now=[estimated_print_time,time]
-      estimated_print_time_datapoints<<estimated_print_time_now
-      estimated_print_time_datapoints=estimated_print_time_datapoints.take(@graph_depth.to_i)
+      @estimated_print_time_datapoints<<estimated_print_time_now
       time_colors="#{@time_color_estimated}:#{@time_color_remaining}:#{@time_color_elapsed}"
       file_colors="#{@file_color_position}:#{@file_color_total}"
 #      warn "OctoPrint: completion:           #{completion}"
@@ -358,30 +390,54 @@ SCHEDULER.every "#{@frequency}s", first_in: 0 do
 #      warn "OctoPrint: estimated_print_time: #{estimated_print_time} (raw: #{_estimated_print_time})"
       job_graphite = [
         {
-          target: "Job Position: #{file_position.to_filesize}", datapoints: file_position_datapoints
+          target: "Job Position: #{file_position.to_filesize}", datapoints: @file_position_datapoints
         },
         {
-          target: "Job Total Size: #{file_size.to_filesize}", datapoints: file_size_datapoints
+          target: "Job Total Size: #{file_size.to_filesize}", datapoints: @file_size_datapoints
         },
       ]
       time_graphite = [
         {
-          target: "Estimated Total: #{estimated_print_time}#{@job_time_units_normalized}", datapoints: estimated_print_time_datapoints
+          target: "Estimated Total: #{estimated_print_time}#{@job_time_units_normalized}", datapoints: @estimated_print_time_datapoints
         },
         {
-          target: "Remaining: #{print_time_left}#{@job_time_units_normalized}", datapoints: print_time_left_datapoints
+          target: "Remaining: #{print_time_left}#{@job_time_units_normalized}", datapoints: @print_time_left_datapoints
         },
         {
-          target: "Elapsed: #{print_time}#{@job_time_units_normalized}", datapoints: print_time_datapoints
+          target: "Elapsed: #{print_time}#{@job_time_units_normalized}", datapoints: @print_time_datapoints
         }
 
       ]
 #      warn "OctoPrint: bed_graphite job: #{bed_graphite}"
       send_event('octoprint_job_graph', series: job_graphite, colors: file_colors)
-      sleep 1
       send_event('octoprint_time_graph', series: time_graphite, colors: time_colors)
-      sleep 1
       send_event('octoprint_completion', value: completion, bgcolor: @completion_bgcolor, fgcolor: @completion_fgcolor)
+      if @history_enable
+        octoprint_history['completion_datapoints']<<completion_now
+        octoprint_history['file_position_datapoints']<<file_position_now
+        octoprint_history['file_size_datapoints']<<file_size_now
+        octoprint_history['print_time_datapoints']<<print_time_now
+        octoprint_history['print_time_left_datapoints']<<print_time_left_now
+        octoprint_history['estimated_print_time_datapoints']<<estimated_print_time_now
+      end
+      if @completion_datapoints.length >= @graph_depth.to_i
+        @completion_datapoints=@completion_datapoints.take(@graph_depth.to_i)
+      end
+      if @file_position_datapoints.length >= @graph_depth.to_i
+        @file_position_datapoints=@file_position_datapoints.take(@graph_depth.to_i)
+      end
+      if @file_size_datapoints.length >= @graph_depth.to_i
+        @file_size_datapoints=@file_size_datapoints.take(@graph_depth.to_i)
+      end
+      if @print_time_datapoints.length >= @graph_depth.to_i
+        @print_time_datapoints=@print_time_datapoints.take(@graph_depth.to_i)
+      end
+      if @print_time_left_datapoints.length >= @graph_depth.to_i
+        @print_time_left_datapoints=@print_time_left_datapoints.take(@graph_depth.to_i)
+      end
+      if @estimated_print_time_datapoints.length >= @graph_depth.to_i
+        @estimated_print_time_datapoints=@estimated_print_time_datapoints.take(@graph_depth.to_i)
+      end
     end
   end
 end
