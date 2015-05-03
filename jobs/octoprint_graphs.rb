@@ -267,10 +267,10 @@ SCHEDULER.every "#{@frequency}s", first_in: 0 do
         octoprint_history['bed_target_datapoints']<<bed_target_now
       end
       if @bed_actual_datapoints.length >= @graph_depth.to_i
-        @bed_actual_datapoints=@bed_actual_datapoints.take(@graph_depth.to_i)
+        @bed_actual_datapoints=@bed_actual_datapoints.drop(@bed_actual_datapoints.length - @graph_depth.to_i)
       end
       if @bed_target_datapoints.length >= @graph_depth.to_i
-        @bed_target_datapoints=@bed_target_datapoints.take(@graph_depth.to_i)
+        @bed_target_datapoints=@bed_target_datapoints.drop(@bed_target_datapoints.length - @graph_depth.to_i)
       end
     end
     if @tool0_graph_enable
@@ -296,10 +296,10 @@ SCHEDULER.every "#{@frequency}s", first_in: 0 do
         octoprint_history['tool0_target_datapoints']<<tool0_target_now
       end
       if tool0_actual_datapoints.length >= @graph_depth.to_i
-        tool0_actual_datapoints=tool0_actual_datapoints.take(@graph_depth.to_i)
+        tool0_actual_datapoints=tool0_actual_datapoints.drop(tool0_actual_datapoints.length - @graph_depth.to_i)
       end
       if tool0_target_datapoints.length >= @graph_depth.to_i
-        tool0_target_datapoints=tool0_target_datapoints.take(@graph_depth.to_i)
+        tool0_target_datapoints=tool0_target_datapoints.drop(tool0_target_datapoints.length - @graph_depth.to_i)
       end
     end
   end
@@ -314,7 +314,7 @@ SCHEDULER.every "#{@frequency}s", first_in: 0 do
     octoprint_history.each_pair do |k,v|
       if v.length >= @graph_depth.to_i
 #        warn "OctoPrint: History depth: #{k}: #{v.length} Trimming"
-        octoprint_history[k]= v.take(@graph_depth.to_i)
+        octoprint_history[k]= v.drop(1)
 #        warn "OctoPrint: History depth: now #{octoprint_history[k].length}"
       else
 #        warn "OctoPrint: History depth: #{k}: #{v.length} "
@@ -420,22 +420,22 @@ SCHEDULER.every "#{@frequency}s", first_in: 0 do
         octoprint_history['estimated_print_time_datapoints']<<estimated_print_time_now
       end
       if @completion_datapoints.length >= @graph_depth.to_i
-        @completion_datapoints=@completion_datapoints.take(@graph_depth.to_i)
+        @completion_datapoints=@completion_datapoints.drop(@completion_datapoints.length - @graph_depth.to_i)
       end
       if @file_position_datapoints.length >= @graph_depth.to_i
-        @file_position_datapoints=@file_position_datapoints.take(@graph_depth.to_i)
+        @file_position_datapoints=@file_position_datapoints.drop(@file_position_datapoints.length - @graph_depth.to_i)
       end
       if @file_size_datapoints.length >= @graph_depth.to_i
-        @file_size_datapoints=@file_size_datapoints.take(@graph_depth.to_i)
+        @file_size_datapoints=@file_size_datapoints.drop(@file_size_datapoints.length - @graph_depth.to_i)
       end
       if @print_time_datapoints.length >= @graph_depth.to_i
-        @print_time_datapoints=@print_time_datapoints.take(@graph_depth.to_i)
+        @print_time_datapoints=@print_time_datapoints.drop(@print_time_datapoints.length - @graph_depth.to_i)
       end
       if @print_time_left_datapoints.length >= @graph_depth.to_i
-        @print_time_left_datapoints=@print_time_left_datapoints.take(@graph_depth.to_i)
+        @print_time_left_datapoints=@print_time_left_datapoints.drop(@print_time_left_datapoints.length - @graph_depth.to_i)
       end
       if @estimated_print_time_datapoints.length >= @graph_depth.to_i
-        @estimated_print_time_datapoints=@estimated_print_time_datapoints.take(@graph_depth.to_i)
+        @estimated_print_time_datapoints=@estimated_print_time_datapoints.drop(@estimated_print_time_datapoints.length - @graph_depth.to_i)
       end
     end
   end
