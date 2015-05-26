@@ -61,28 +61,25 @@ if @history_enable
     if !octoprint_history
       warn "OctoPrint: But YAML.load_file couldn't load it for some reason. Reinitializing"
       octoprint_history=Hash.new
-      ['bed_actual_datapoints', 'bed_target_datapoints',
-      'tool0_actual_datapoints', 'tool0_target_datapoints',
-      'completion_datapoints', 'estimated_print_time_datapoints',
-      'file_position_datapoints', 'file_size_datapoints',
-      'print_time_datapoints', 'print_time_left_datapoints',].each do |hist|
-        octoprint_history["#{hist}"]=Array.new
-      end
       octoprint_history.to_yaml
   #    warn   "OctoPrint: History: #{octoprint_history}"
       File.open(octoHistoryFile, "w") { |f|
         f.write octoprint_history
       }
+    else
+      warn   "OctoPrint: New history file initialized"
+      octoprint_history=Hash.new
     end
-  else
-    warn   "OctoPrint: New history file initialized"
-    octoprint_history=Hash.new
+    #sanity check
     ['bed_actual_datapoints', 'bed_target_datapoints',
     'tool0_actual_datapoints', 'tool0_target_datapoints',
     'completion_datapoints', 'estimated_print_time_datapoints',
     'file_position_datapoints', 'file_size_datapoints',
     'print_time_datapoints', 'print_time_left_datapoints',].each do |hist|
-      octoprint_history["#{hist}"]=Array.new
+      if !octoprint_history["#{hist}"]
+        warn "OctoPrint: History initialized, but #{hist} not in octoprint_history. Initializing."
+        octoprint_history["#{hist}"]=Array.new
+      end
     end
     octoprint_history.to_yaml
 #    warn   "OctoPrint: History: #{octoprint_history}"
