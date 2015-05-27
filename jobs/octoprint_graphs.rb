@@ -62,31 +62,31 @@ if @history_enable
       warn "OctoPrint: But YAML.load_file couldn't load it for some reason. Reinitializing"
       octoprint_history=Hash.new
       octoprint_history.to_yaml
-  #    warn   "OctoPrint: History: #{octoprint_history}"
+      #warn   "OctoPrint: History: #{octoprint_history}"
       File.open(octoHistoryFile, "w") { |f|
         f.write octoprint_history
       }
-    else
-      warn   "OctoPrint: New history file initialized"
-      octoprint_history=Hash.new
     end
-    #sanity check
-    ['bed_actual_datapoints', 'bed_target_datapoints',
-    'tool0_actual_datapoints', 'tool0_target_datapoints',
-    'completion_datapoints', 'estimated_print_time_datapoints',
-    'file_position_datapoints', 'file_size_datapoints',
-    'print_time_datapoints', 'print_time_left_datapoints',].each do |hist|
-      if !octoprint_history["#{hist}"]
-        warn "OctoPrint: History initialized, but #{hist} not in octoprint_history. Initializing."
-        octoprint_history["#{hist}"]=Array.new
-      end
-    end
-    octoprint_history.to_yaml
-#    warn   "OctoPrint: History: #{octoprint_history}"
-    File.open(octoHistoryFile, "w") { |f|
-      f.write octoprint_history
-    }
+  else
+    warn "OctoPrint: New history file initialized"
+    octoprint_history=Hash.new
   end
+  #sanity check
+  ['bed_actual_datapoints', 'bed_target_datapoints',
+  'tool0_actual_datapoints', 'tool0_target_datapoints',
+  'completion_datapoints', 'estimated_print_time_datapoints',
+  'file_position_datapoints', 'file_size_datapoints',
+  'print_time_datapoints', 'print_time_left_datapoints',].each do |hist|
+    if !octoprint_history["#{hist}"]
+      warn "OctoPrint: History initialized, but #{hist} not in octoprint_history. Initializing."
+      octoprint_history["#{hist}"]=Array.new
+    end
+  end
+  octoprint_history.to_yaml
+  #warn   "OctoPrint: History: #{octoprint_history}"
+  File.open(octoHistoryFile, "w") { |f|
+    f.write octoprint_history
+  }
 end
 
 case @job_time_units
