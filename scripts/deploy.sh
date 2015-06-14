@@ -31,12 +31,12 @@ usage () {
 
 error () {
   MSG=$1
-  echo -e "\033[31mERROR\033[0m: \033[32m${FUNCNAME[1]}()\033[0m: $MSG" >>/dev/stderr
+  echo -e "\033[31mERROR\033[0m: \033[32m${FUNCNAME[1]}()\033[0m: $MSG" 1>&2
 }
 
 warn () {
   MSG=$1
-  echo -e "\033[1;33mWARN\033[0m: $MSG" >>/dev/stderr
+  echo -e "\033[1;33mWARN\033[0m: $MSG" 1>&2
 }
 
 info () {
@@ -189,9 +189,9 @@ linkDashboard(){
 }
 
 finishUp(){
-  echo -e "\033[32m${PLUGINNAME} has been successfully installed!\033[0m">>/dev/stderr
-  echo -e "\033[1;33mBe sure to restart dashing to pick up the changes.\033[0m">>/dev/stderr
-  echo -e "Read the \033[1;33mREADME.MD\033[0m file for instructions on the ${CONFFILE} file.">>/dev/stderr
+  echo -e "\033[32m${PLUGINNAME} has been successfully installed!\033[0m" 1>&2
+  echo -e "\033[1;33mRestart dashing to pick up the changes.\033[0m" 1>&2
+  echo -e "Read the \033[1;33mREADME.MD\033[0m file for instructions on the ${CONFFILE} file." 1>&2
 }
 
 #optional cronjob?
