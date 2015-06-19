@@ -57,9 +57,17 @@ if @history_enable
   octoHistoryFile=@history_file
   if File.exists?(octoHistoryFile)
     warn   "OctoPrint: History file exists"
-    octoprint_history = YAML.load_file(octoHistoryFile)
-    if !octoprint_history
+    begin
+      octoprint_history = YAML.load_file(octoHistoryFile)
+    rescue
       warn "OctoPrint: But YAML.load_file couldn't load it for some reason. Reinitializing"
+      octoprint_history=Hash.new
+      octoprint_history.to_yaml
+      #warn   "OctoPrint: History: #{octoprint_history}"
+      File.open(octoHistoryFile, "w") { |f|
+        f.write octoprint_history
+      }
+    else
       octoprint_history=Hash.new
       octoprint_history.to_yaml
       #warn   "OctoPrint: History: #{octoprint_history}"

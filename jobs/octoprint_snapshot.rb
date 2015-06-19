@@ -95,10 +95,10 @@ def make_web_friendly(file)
 end
 # :first_in sets how long it takes before the job is first run. In this case, it is run immediately
 SCHEDULER.every "#{@webcam_frequency}s", first_in: 0 do
-	new_snapshot = fetch_image(@octo_server,@last_file,@current_file,@webcam_port,@snapshot_url,@webcam_ssl_enable)
+	new_snapshot = make_web_friendly(fetch_image(@octo_server,@last_file,@current_file,@webcam_port,@snapshot_url,@webcam_ssl_enable))
 	if not File.exists?(@current_file)
     warn "Failed to Get Camera Image"
 	end
   _last_file = @last_file.slice "assets"
-	send_event('octoprint_snapshot', {"octo-image": make_web_friendly(new_snapshot)})
+	send_event('octoprint_snapshot', octo_image: new_snapshot)
 end
