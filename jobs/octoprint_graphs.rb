@@ -60,7 +60,7 @@ if @history_enable
     begin
       octoprint_history = YAML.load_file(octoHistoryFile)
     rescue
-      warn "OctoPrint: But YAML.load_file couldn't load it for some reason. Reinitializing"
+      warn "OctoPrint: But YAML.load_file needed to be rescued. Reinitializing"
       octoprint_history=Hash.new
       octoprint_history.to_yaml
       #warn   "OctoPrint: History: #{octoprint_history}"
@@ -68,6 +68,7 @@ if @history_enable
         f.write octoprint_history
       }
     else
+      warn "OctoPrint: But YAML.load_file couldn't load it for some reason. Reinitializing"
       octoprint_history=Hash.new
       octoprint_history.to_yaml
       #warn   "OctoPrint: History: #{octoprint_history}"
