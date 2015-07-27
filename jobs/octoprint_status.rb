@@ -57,6 +57,7 @@ def getOctoPrintStatus(server_fqdn,port,key,endpoint,ssl_enable)
     end
     # Create Request
     req =  Net::HTTP::Get.new(uri.request_uri)
+    req.add_field "X-Api-Key", "#{key}"
     # Fetch Request
     res = http.request(req)
 #    warn "OctoPrint: getOctoPrintStatus: Response HTTP Status Code: #{res.code}"

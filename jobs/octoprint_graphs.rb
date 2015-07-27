@@ -234,6 +234,7 @@ def getOctoPrintStatus(server_fqdn,port,key,endpoint,ssl_enable)
     end
     # Create Request
     req =  Net::HTTP::Get.new(uri.request_uri)
+    req.add_field "X-Api-Key", "#{key}"
     # Fetch Request
     res = http.request(req)
 #    warn "OctoPrint: getOctoPrintStatus: Response HTTP Status Code: #{res.code}"
@@ -266,8 +267,8 @@ SCHEDULER.every "#{@frequency}s", first_in: 0 do
   time = Time.now.to_i
   if data
     if @bed_graph_enable
-      bed_actual=data['temps']['bed']['actual'].to_i
-      bed_target=data['temps']['bed']['target'].to_i
+      bed_actual=data['temperature']['bed']['actual'].to_i
+      bed_target=data['temperature']['bed']['target'].to_i
       bed_actual_now=[bed_actual,time]
       bed_target_now=[bed_target,time]
       @bed_actual_datapoints<<bed_actual_now
@@ -295,8 +296,8 @@ SCHEDULER.every "#{@frequency}s", first_in: 0 do
       end
     end
     if @tool0_graph_enable
-      tool0_actual=data['temps']['tool0']['actual'].to_i
-      tool0_target=data['temps']['tool0']['target'].to_i
+      tool0_actual=data['temperature']['tool0']['actual'].to_i
+      tool0_target=data['temperature']['tool0']['target'].to_i
       tool0_actual_now=[tool0_actual,time]
       tool0_target_now=[tool0_target,time]
       tool0_actual_datapoints<<tool0_actual_now
